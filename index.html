@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kike</title>
+    <title>待办系统</title>
     <style>
 
         #calendarViewBtn {
@@ -426,6 +426,8 @@
         saveTodos();
         updateDays();
         renderCalendar(); // 重新渲染日历
+        console.log("currentSelectedDate", currentSelectedDate);
+        console.log("targetdate", targetDate);
     }
 }
 
@@ -550,6 +552,12 @@ function toggleCalendarView() {
     if (isCalendarView) {
         renderCalendar();
     }
+
+        if (!isCalendarView) {
+        currentSelectedDate = formatDate(currentDate); // 设置当前选中日期为当前日期
+        renderTodoList(); // 渲染待办事项列表
+        renderCalendar();
+    }
 }
 
 let currentMonth = new Date(); // 当前显示的月份
@@ -604,27 +612,68 @@ function renderCalendar() {
                 todoText.classList.add('completed');
             }
  // 设置为可拖动
+
             todoText.setAttribute('draggable', true);
-            todoText.addEventListener('dragstart', (e) => handleDragStart(todo)); // 拖动开始
 
 
 
-            todoText.addEventListener('dblclick', () => {
-                toggleComplete(todo.id); // 切换任务状态
-                renderCalendar(); // 更新日历视图
-            });
+
+
+
+
+
+
+let isDragging = false;
+let clickCount = 0; // 记录点击次数
+
+todoText.addEventListener('dragstart', (e) => {
+    isDragging = true; // 设置拖动标志
+    console.log("Is dragging:", isDragging); // 打印拖动状态
+    handleDragStart(todo); // 拖动开始
+});
+
+dayDiv.addEventListener('mousedown', () => {
+    clickCount = 0; // 重置点击次数
+    currentSelectedDate = formattedDate; // 更新当前选中日期
+
+    renderCalendar(); // 重新渲染日历以高亮显示选中日期
+});
+
+todoText.addEventListener('mousedown', () => {
+    clickCount++; // 增加点击次数
+    console.log(" clickCount",  clickCount); // 添加调试信息
+    if (clickCount === 2) { // 检测双击
+        console.log("Double clicked"); // 添加调试信息
+        if (!isDragging) { // 如果没有拖动，执行双击事件
+            toggleComplete(todo.id); // 切换任务状态
+            renderCalendar(); // 更新日历视图
+        }
+        clickCount = 0; // 重置点击次数
+    }
+});
+
+// 拖动结束时重置拖动标志
+todoText.addEventListener('dragend', () => {
+    isDragging = false; // 重置拖动状态
+});
+
+
+
+
+
+
+
+
+
                 // 更新 currentSelectedDate
 
             dayDiv.appendChild(todoText);
         });
 
-        
+
 
                 // 更新当前选中日期
-        dayDiv.addEventListener('mousedown', () => {
-            currentSelectedDate = formattedDate; // 更新当前选中日期
-            renderCalendar(); // 重新渲染日历以高亮显示选中日期
-        });
+
 
 
 
