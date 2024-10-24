@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待办系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .date-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border-bottom: 2px solid #ccc;
+        }
+        .arrow {
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0 10px;
+        }
+        .days {
+            display: flex;
+            justify-content: space-between;
+            flex-grow: 1;
+            margin: 0 10px;
+        }
+        .day {
+            position: relative;
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .day:hover {
+            background-color: #e0e0e0;
+        }
+        .active {
+            background-color: #a0d8ef;
+        }
+        .badge {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+        .todo-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .todo-text {
+            flex-grow: 1;
+            padding: 5px;
+            margin-right: 10px;
+            border: none;
+            outline: none;
+            background-color: #fff;
+        }
+        .todo-text[disabled] {
+            background-color: #f0f0f0;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .todo-buttons button {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        #addTodo {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #d3d3d3;
+            color: black;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+        }
+        #addTodo:hover {
+            background-color: #a9a9a9;
+        }
+        .delete-confirm {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 日期导航部分 -->
+    <div class="date-nav">
+        <span class="arrow" id="prevDay">&lt;</span>
+        <div class="days" id="daysContainer">
+            <!-- 日期将会动态生成 -->
+        </div>
+        <span class="arrow" id="nextDay">&gt;</span>
+    </div>
+
+    <!-- 待办列表部分 -->
+    <div class="todo-container" id="todoContainer">
+        <!-- 待办事项将会在这里生成 -->
+    </div>
+    <button id="addTodo">+</button>
+
+    <script>
+        // 日期初始化
+        let currentDate = new Date(); // 当前显示的开始日期
+        const daysContainer = document.getElementById("daysContainer");
+
+        // 待办事项存储 (以日期为键)
+        let todosByDate = {};
+
+        const todoContainer = document.getElementById('todoContainer');
+        const addTodoBtn = document.getElementById('addTodo');
+        let currentSelectedDate = formatDate(currentDate); // 初始日期
+
+        // 从localStorage加载数据
+        function loadTodos() {
+            const storedData = localStorage.getItem('todosByDate');
+            if (storedData) {
+                todosByDate = JSON.parse(storedData);
+            }
+        }
+
+        // 保存到localStorage
+        function saveTodos() {
+            localStorage.setItem('todosByDate', JSON.stringify(todosByDate));
+        }
+
+        // 日期格式化
+        function formatDate(date) {
+            return date.toISOString().split('T')[0]; // 返回 YYYY-MM-DD 格式
+        }
+
+        // 生成7天的日期显示
+        function updateDays() {
+            daysContainer.innerHTML = ''; // 清空日期容器
+            const dayOfWeek = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            let tempDate = new Date(currentDate);
+
+            for (let i = 0; i < 7; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+                const formattedDate = formatDate(tempDate);
+
+                dayDiv.textContent = `${dayOfWeek[tempDate.getDay()]} ${tempDate.getMonth() + 1}-${tempDate.getDate()}`;
+                dayDiv.setAttribute("data-date", formattedDate);
+
+                // 如果有未完成的待办事项，显示红色小圆点
+                const pendingTodos = (todosByDate[formattedDate] || []).filter(todo => !todo.completed).length;
+                if (pendingTodos > 0) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge';
+                    badge.textContent = pendingTodos;
+                    dayDiv.appendChild(badge);
+                }
+
+                // 绑定日期点击事件
+                dayDiv.addEventListener('click', (e) => {
+                    const selectedDate = e.target.getAttribute("data-date");
+                    Array.from(daysContainer.children).forEach(d => d.classList.remove('active'));
+                    e.target.classList.add('active');
+                    showTodoList(selectedDate);
+                });
+
+                // 如果是今天，则高亮显示
+                if (formattedDate === formatDate(new Date())) {
+                    dayDiv.classList.add('active');
+                    currentSelectedDate = formattedDate;
+                }
+
+                daysContainer.appendChild(dayDiv);
+                tempDate.setDate(tempDate.getDate() + 1);
+            }
+        }
+
+        // 显示待办列表
+        function showTodoList(date) {
+            currentSelectedDate = date;
+            renderTodoList();
+        }
+
+        // 渲染待办列表
+        function renderTodoList() {
+            todoContainer.innerHTML = ''; // 清空容器
+            const todos = todosByDate[currentSelectedDate] || [];
+
+            todos.forEach(todo => {
+                const todoElement = document.createElement('div');
+                todoElement.className = 'todo-item';
+
+                // 勾选框
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'todo-checkbox';
+                checkbox.checked = todo.completed;
+                checkbox.addEventListener('click', () => toggleComplete(todo.id));
+                todoElement.appendChild(checkbox);
+
+                // 文本输入框
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'todo-text';
+                input.value = todo.text;
+                input.disabled = !todo.editing;
+                if (todo.completed) input.classList.add('completed');
+                todoElement.appendChild(input);
+
+                // 按钮容器
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'todo-buttons';
+
+                // 确定按钮（仅在编辑状态显示）
+                if (todo.editing) {
+                    const saveBtn = document.createElement('button');
+                    saveBtn.textContent = '确定';
+                    saveBtn.addEventListener('click', () => saveTodoText(todo.id, input.value));
+                    buttonContainer.appendChild(saveBtn);
+
+                    // 支持按下回车保存
+                    input.addEventListener('keydown', (event) => {
+                        if (event.key === 'Enter') {
+                            saveTodoText(todo.id, input.value);
+                        }
+                    });
+                } else {
+                    // 编辑按钮
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = '编辑';
+                    editBtn.addEventListener('click', () => editTodoText(todo.id));
+                    buttonContainer.appendChild(editBtn);
+                }
+
+                // 删除按钮
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = todo.deleteConfirmed ? '确认删除' : '删除';
+                deleteBtn.classList.toggle('delete-confirm', todo.deleteConfirmed);
+                deleteBtn.addEventListener('click', () => confirmDelete(todo.id));
+                buttonContainer.appendChild(deleteBtn);
+
+                todoElement.appendChild(buttonContainer);
+                todoContainer.appendChild(todoElement);
+            });
+
+            // 更新日期小红点
+            updateDays();
+            saveTodos(); // 保存数据到localStorage
+        }
+
+        // 新增待办项
+        function addNewTodo() {
+            const newTodo = {
+                id: Date.now(),
+                text: '',
+                completed: false,
+                editing: true,
+                deleteConfirmed: false
+            };
+            todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate] || [];
+            todosByDate[currentSelectedDate].push(newTodo);
+            renderTodoList();
+
+            // 自动聚焦到新创建的输入框
+            const inputFields = document.querySelectorAll('.todo-text');
+            inputFields[inputFields.length - 1].focus();
+        }
+
+        // 切换完成状态
+        function toggleComplete(id) {
+            todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate].map(todo => {
+                if (todo.id === id) {
+                    todo.completed = !todo.completed;
+                }
+                return todo;
+            });
+            renderTodoList();
+        }
+
+        // 保存编辑后的文本
+        function saveTodoText(id, newText) {
+            todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate].map(todo => {
+                if (todo.id === id) {
+                    todo.text = newText;
+                    todo.editing = false;
+                }
+                return todo;
+            });
+            renderTodoList();
+        }
+
+        // 编辑待办项
+        function editTodoText(id) {
+            todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate].map(todo => {
+                if (todo.id === id) {
+                    todo.editing = true;
+                }
+                return todo;
+            });
+            renderTodoList();
+        }
+
+        // 确认删除
+        function confirmDelete(id) {
+            todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate].map(todo => {
+                if (todo.id === id) {
+                    if (todo.deleteConfirmed) {
+                        return null; // 标记为null
+                    }
+                    todo.deleteConfirmed = true;
+                }
+                return todo;
+            }).filter(todo => todo !== null); // 过滤掉删除的项
+            renderTodoList();
+        }
+
+        // 左右箭头切换日期（跳转7天）
+        document.getElementById("prevDay").addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 7);
+            updateDays();
+        });
+        document.getElementById("nextDay").addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 7);
+            updateDays();
+        });
+
+        // 新增待办事件绑定
+        addTodoBtn.addEventListener('click', addNewTodo);
+
+        // 初始化加载数据并渲染界面
+        loadTodos();
+        updateDays();
+        renderTodoList();
+
+    </script>
+</body>
+</html>
