@@ -391,11 +391,26 @@
                 buttonContainer.appendChild(editBtn);
             }
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = todo.deleteConfirmed ? '确认删除' : '删除';
-            deleteBtn.classList.toggle('delete-confirm', todo.deleteConfirmed);
-            deleteBtn.addEventListener('click', () => confirmDelete(todo.id));
-            buttonContainer.appendChild(deleteBtn);
+const deleteBtn = document.createElement('button');
+deleteBtn.textContent = todo.deleteConfirmed ? '确认删除' : '删除';
+deleteBtn.classList.toggle('delete-confirm', todo.deleteConfirmed);
+deleteBtn.addEventListener('click', () => confirmDelete(todo.id));
+
+// 添加 mouseenter 和 mouseleave 事件监听器
+deleteBtn.addEventListener('mouseenter', () => {
+    if (todo.deleteConfirmed) {
+        deleteBtn.textContent = '确认删除'; // 鼠标悬停时保持确认删除
+
+    }
+});
+
+deleteBtn.addEventListener('mouseleave', () => {
+    deleteBtn.textContent = '删除'; // 鼠标移开时恢复文本
+
+                    todo.deleteConfirmed=false;
+});
+
+buttonContainer.appendChild(deleteBtn);
 
             todoElement.appendChild(buttonContainer);
             todoContainer.appendChild(todoElement);
