@@ -967,12 +967,64 @@ document.addEventListener('keydown', function(event) {
                     <p>8. 日历视图下，可以拖动改变任务日期</p>
                     <p>9. ctrl+. 可以以markdown格式导出所有任务</p>
                     <p>10. ctrl+/ 可以显示说明 </p>
+                    <p>10. ctrl+, 可以导入任务（格式同9导出的） </p>
                 </body>
             </html>
         `);
         helpTab.document.close(); // 关闭文档流以完成页面加载
     }
 });
+
+
+
+// 监听键盘事件
+document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.key === ',') {
+        // 弹出输入框
+        const userInput = prompt("请输入待办事项：");
+        if (userInput) {
+            importTodos(userInput);
+        }
+    }
+});
+
+function importTodos(input) {
+    const todosByDate = {};
+
+    // 按行分割输入内容
+    const lines = input.split('\n');
+
+    let currentDate = '';
+
+    lines.forEach(line => {
+        line = line.trim();
+        // 匹配日期
+        const dateMatch = line.match(/^## (\d{4}-\d{2}-\d{2})$/);
+        if (dateMatch) {
+            currentDate = dateMatch[1];
+            todosByDate[currentDate] = [];
+        }
+        // 匹配待办事项
+        const todoMatch = line.match(/^- \[(x| )\] (.+)$/);
+        if (todoMatch && currentDate) {
+            const completed = todoMatch[1] === 'x';
+            const text = todoMatch[2];
+
+            // 添加待办事项（忽略 ID）
+            todosByDate[currentDate].push({
+                id: Date.now(), // 生成新 ID
+                text: text,
+                completed: completed
+            });
+        }
+    });
+
+    // 存储到 localStorage
+    localStorage.setItem('todosByDate', JSON.stringify(todosByDate));
+    console.log('待办事项已导入:', todosByDate);
+     location.reload();
+}
+
 
     </script>
 </body>
