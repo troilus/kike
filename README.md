@@ -1,6 +1,8 @@
 # kike
 类似Kite待办的单文件web版待办小工具，代码几乎全部由GPT生成。
 
+可以在线使用，也可以将 HTML 文件保存下来使用，所有数据存储在本地。
+
 https://troilus.github.io/kike/
 
 周
