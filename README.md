@@ -21,3 +21,4 @@ https://troilus.github.io/kike/
 8. 日历视图下，可以拖动改变任务日期
 9. ctrl+. 可以以markdown格式导出所有任务
 10. ctrl+/ 可以显示使用说明
+11. ctrl+, 可以导入任务（格式同9导出的）
