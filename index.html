@@ -449,6 +449,7 @@ padding-top: 15px;
         if (inputField) {
             inputField.querySelector('.todo-text').focus();
 
+
         }
     } else {
         const lastTodo = Array.from(todoContainer.children).slice(-1)[0];
@@ -558,12 +559,20 @@ datePicker.addEventListener('change', (event) => {
 const deleteBtn = document.createElement('button');
 deleteBtn.textContent = todo.deleteConfirmed ? '确认删除' : '删除';
 datePicker.style.display = 'none';
+
 deleteBtn.classList.toggle('delete-confirm', todo.deleteConfirmed);
 deleteBtn.addEventListener('click', () => {
 
     confirmDelete(todo.id);
-    console.log("点删除");
-    chooseDateBtn.style.display = 'none';
+
+               const buttons = document.querySelectorAll('button');
+    // 遍历所有按钮，查找文本为“确定”的按钮
+    buttons.forEach(button => {
+        if (button.textContent.trim() === '选择日期') {
+            button.style.display = 'none'; 
+        }
+    });  
+
 
 });
 
@@ -571,14 +580,11 @@ deleteBtn.addEventListener('click', () => {
 deleteBtn.addEventListener('mouseenter', () => {
     if (todo.deleteConfirmed) {
         deleteBtn.textContent = '确认删除'; // 鼠标悬停时保持确认删除
-
-
     }
 });
 
 deleteBtn.addEventListener('mouseleave', () => {
     deleteBtn.textContent = '删除'; // 鼠标移开时恢复文本
-
                     todo.deleteConfirmed=false;
 });
 
@@ -630,6 +636,7 @@ buttonContainer.appendChild(deleteBtn);
             todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate] || [];
             todosByDate[currentSelectedDate].push(newTodo);
             datePicker.style.display = 'none';
+
             renderTodoList();
 
             const inputFields = document.querySelectorAll('.todo-text');
@@ -637,7 +644,6 @@ buttonContainer.appendChild(deleteBtn);
 
 
             const buttons = document.querySelectorAll('button');
-
     // 遍历所有按钮，查找文本为“确定”的按钮
     buttons.forEach(button => {
         if (button.textContent.trim() === '选择日期') {
@@ -685,6 +691,7 @@ buttonContainer.appendChild(deleteBtn);
         }
         return todo;
     });
+
     chooseDateBtn.style.display = 'none'; // 显示 "选择日期" 按钮
     renderTodoList();
         }
@@ -714,12 +721,7 @@ buttonContainer.appendChild(deleteBtn);
         editingTodoId = null; // 清空编辑中的ID
     }
         function confirmDelete(id) {
-            
-
-        chooseDateBtn.style.display = 'none'
-
-
-
+        
 
             todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate].map(todo => {
 
@@ -733,6 +735,7 @@ buttonContainer.appendChild(deleteBtn);
 
                 return todo;
             }).filter(todo => todo !== null);
+
 
             renderTodoList();
         }
