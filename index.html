@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22  font-size=%2290%22>🐠</text></svg>">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>待办系统</title>
+    <title>✔我的待办</title>
     <style>
+
 
         #calendarViewBtn {
     width: 100%;
     margin-top: 10px;
     padding: 10px 15px;
-    background-color: #d3d3d3; /* 和 + 按钮一样的背景颜色 */
-    color: black;
+    background-color: #FF4351;
+    outline: -webkit-focus-ring-color auto 1px;
+    color: white;
     border: none;
     cursor: pointer;
     text-align: center;
@@ -19,18 +24,31 @@
 }
 
 #calendarViewBtn:hover {
-    background-color: #a9a9a9; /* 和 + 按钮一样的悬停效果 */
+    background-color: #ff7680; /* 和 + 按钮一样的悬停效果 */
 }
+
+
+
+
         body {
             font-family: Arial, sans-serif;
+                max-width: 720px; /* 最大宽度 */
+    margin: 25px auto;    /* 水平居中 */
+    padding: 0 20px;   /* 内边距，防止内容紧贴边缘 */
         }
+
+
+
         .date-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px;
-            background-color: #f2f2f2;
+background-color: #fec04e;
             border-bottom: 2px solid #ccc;
+                        outline: -webkit-focus-ring-color auto 1px;
+                        color: #221f1f;
+
         }
         .arrow {
             cursor: pointer;
@@ -59,11 +77,16 @@
         }
 
         .day:hover {
-            background-color: #e0e0e0;
+            background-color: #ffda97;
+            border-radius: 6px;
+                                    color: #221f1f;
         }
         .active {
-            background-color: #a0d8ef;
+            background-color: #ffda97;
             font-weight: bold;
+            border-radius: 6px;
+                                    color: #221f1f;
+
         }
         .today {
             font-weight: bold;
@@ -72,7 +95,7 @@
             position: absolute;
             top: 5px;
             right: 10px;
-            background-color: red;
+            background-color: #FF4351;
             color: white;
             border-radius: 50%;
             padding: 2px 6px;
@@ -80,9 +103,23 @@
         }
         .todo-container {
             margin-top: 20px;
-            padding: 20px;
+
+            padding-right: 20px;
+
+            padding-left: 20px;
             background-color: #f9f9f9;
             border: 1px solid #ddd;
+            outline: -webkit-focus-ring-color auto 1px;
+        }
+        /* 新增样式以调整日期选择器的位置 */
+        .date-picker-container {
+            display: flex;
+            align-items: center;
+            margin-left: 10px; /* 调整间距 */
+        }
+        #datePicker {
+            display: none; /* 初始隐藏 */
+          /* margin-right: 10px;  按钮与日期选择器之间的间距 */
         }
         .todo-item {
             display: flex;
@@ -99,35 +136,64 @@
         }
         .todo-text {
             flex-grow: 1;
-            padding: 5px;
+    color: #131315;
+
+font-size: 16px;
+padding-top: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+    padding-left: 1px;
             margin-right: 10px;
             border: none;
             outline: none;
             background-color: #fff;
         }
         .todo-text[disabled] {
-            background-color: #f0f0f0;
+            background-color: #f9f9f9;
         }
         .completed {
             text-decoration: line-through;
             color: #888;
         }
-        .todo-buttons button {
-            margin-left: 5px;
-            cursor: pointer;
-        }
+
+.todo-buttons .delete-confirm {
+    background-color: #FF4351 ;
+    color: white;
+    border-color: #FF4351;
+    border: none;
+    background: #FF4351;
+}
+
+
+.todo-buttons button {
+    animation-name: glowing-primary;
+    border-color: #088ef0;
+    background: linear-gradient(#34a5f8, #088ef0);
+    color: #FFF;
+    margin: 2.5px;
+    border-style: solid;
+    border-width: 1px;
+    line-height: 25px;
+    border-radius: 4px;
+    text-align: center;
+    border: none;
+}
 
 .calendar-day.today {
-    background-color: #a0d8ef; /* 今日的背景 */
-    color: white; /* 反色显示 */
+    background-color: #fffeaa; /* 今日的背景 */
+    color: black; /* 反色显示 */
+    font-size: 12px;
 }
 .calendar-nav {
     display: flex;
     justify-content: center; /* 中心对齐 */
     align-items: center;
-    padding: 10px; /* 添加内边距 */
-    background-color: #f2f2f2; /* 背景色 */
+    padding: 28px; /* 添加内边距 */
     border-bottom: 2px solid #ccc; /* 边框 */
+    background-color: #fec04e;
+    outline: -webkit-focus-ring-color auto 1px;
+    color: #221f1f;
+    font-weight: bold;
 }
 
 .calendar-header {
@@ -135,24 +201,32 @@
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
     font-weight: bold;
+    padding-top: 28px;
+    padding-bottom: 28px;
 }
 
 .calendar-body {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
+    grid-template-columns: repeat(7, 1fr); /* 七列 */
+    grid-template-rows: repeat(autofill, 1fr); /* 行自适应 */
+    height: 60vh; /* 占据整个视口高度 */
+
+    gap: 10px; /* 可选，设置格子之间的间距 */
+
 }
 
 .calendar-day {
     border: 1px solid #ddd;
     padding: 10px;
     position: relative;
+        font-size: 12px;
 }
         #addTodo {
             width: 100%;
             margin-top: 10px;
+            outline: -webkit-focus-ring-color auto 1px;
             padding: 10px 15px;
-            background-color: #d3d3d3;
+            background-color: #A5DE37;
             color: black;
             border: none;
             cursor: pointer;
@@ -160,12 +234,9 @@
             font-size: 16px;
         }
         #addTodo:hover {
-            background-color: #a9a9a9;
+            background-color: #b9e563
         }
-        .delete-confirm {
-            background-color: red;
-            color: white;
-        }
+
     </style>
 </head>
 <body>
@@ -217,11 +288,43 @@
 
 
 
+<button id="chooseDateBtn" style="display: none;">选择日期</button>
+<input type="date" id="datePicker" style="display: none;">
 
-
-    <button id="addTodo">+</button>
-    <button id="calendarViewBtn">日历视图</button>
+    <button id="addTodo">➕</button>
+    <button id="calendarViewBtn">📅日历视图</button>
     <script>
+            // 获取元素
+    const chooseDateBtn = document.getElementById('chooseDateBtn');
+    const datePicker = document.getElementById('datePicker');
+    let editingTodoId = null; // 用于保存当前正在编辑的待办项的ID
+
+    // 日期选择按钮事件，点击后弹出日期选择器
+    chooseDateBtn.addEventListener('click', () => {
+        if (editingTodoId !== null) {
+            const todo = todosByDate[currentSelectedDate].find(todo => todo.id === editingTodoId);
+            if (todo) {
+            if (todo) {
+                // 显示日期选择器并设置默认值为当前待办事项的日期
+                datePicker.value = currentSelectedDate;
+                datePicker.style.display = 'inline-block';
+                //datePicker.focus(); // 使日期选择器自动获得焦点
+                }
+            }
+        }
+    });
+
+        // 监听用户选择日期的事件
+    datePicker.addEventListener('change', (event) => {
+        const selectedDate = event.target.value;
+
+        if (selectedDate && editingTodoId !== null) {
+            updateTodoDate(editingTodoId, selectedDate);
+        }
+        datePicker.style.display = 'none';
+    });
+
+
         let currentDate = new Date(); // 当前显示的开始日期
         const daysContainer = document.getElementById("daysContainer");
 
@@ -229,6 +332,7 @@
         const todoContainer = document.getElementById('todoContainer');
         const addTodoBtn = document.getElementById('addTodo');
         let currentSelectedDate = formatDate(currentDate); // 初始日期
+
         let draggedTodo = null; // 存储被拖动的待办信息
 
         function loadTodos() {
@@ -260,11 +364,17 @@
     // 只有在有有效 todos 的情况下才保存到 localStorage
     if (hasValidTodos) {
         localStorage.setItem('todosByDate', JSON.stringify(todosToSave));
+
+    } else {
+        // 如果没有有效的 todos，则清空 localStorage
+        localStorage.removeItem('todosByDate');
+
     }
 }
 
         function formatDate(date) {
-            return date.toISOString().split('T')[0]; // 返回 YYYY-MM-DD 格式
+            const offsetDate = new Date(date.getTime() + (8 * 60 * 60 * 1000)); // Offset for GMT+8
+            return offsetDate.toISOString().split('T')[0]; // 返回 YYYY-MM-DD 格式
         }
 
         // 生成7天的日期显示 (始终以周一为开始)
@@ -280,7 +390,7 @@
                 dayDiv.className = 'day';
                 const formattedDate = formatDate(tempDate);
 
-                dayDiv.textContent = `${dayOfWeek[tempDate.getDay()]} ${tempDate.getMonth() + 1}-${tempDate.getDate()}`;
+                dayDiv.innerHTML = `${dayOfWeek[tempDate.getDay()]}<br>${tempDate.getMonth() + 1}-${tempDate.getDate()}`;
                 dayDiv.setAttribute("data-date", formattedDate);
 
                 const pendingTodos = (todosByDate[formattedDate] || []).filter(todo => !todo.completed).length;
@@ -297,6 +407,7 @@
                     const selectedDate = e.target.getAttribute("data-date");
                     Array.from(daysContainer.children).forEach(d => d.classList.remove('active'));
                     e.target.classList.add('active');
+
                     showTodoList(selectedDate);
                 });
 
@@ -315,12 +426,14 @@
 
         function showTodoList(date) {
             currentSelectedDate = date;
+
             renderTodoList();
         }
 
         function renderTodoList() {
             todoContainer.innerHTML = '';
             const todos = todosByDate[currentSelectedDate] || [];
+
             const uncompletedTodos = todos.filter(todo => !todo.completed);
             const completedTodos = todos.filter(todo => todo.completed);
 
@@ -332,6 +445,7 @@
         const inputField = Array.from(todoContainer.children).find(item => item.querySelector('.todo-text').value === editingTodo.text);
         if (inputField) {
             inputField.querySelector('.todo-text').focus();
+
         }
     } else {
         const lastTodo = Array.from(todoContainer.children).slice(-1)[0];
@@ -371,9 +485,43 @@
 
             if (todo.editing) {
                 todoElement.classList.add('editing');
+
+    // 创建选择日期按钮
+    const chooseDateBtn = document.createElement('button');
+    chooseDateBtn.textContent = '选择日期';
+            // 新增日期选择器容器
+        const datePickerContainer = document.createElement('div');
+        datePickerContainer.className = 'date-picker-container';
+    // 选择日期按钮的点击事件
+    chooseDateBtn.addEventListener('click', () => {
+        // 显示日期选择器并设置默认值为当前待办事项的日期
+        datePicker.value = currentSelectedDate; // 使用当前选定的日期
+        datePicker.style.display = 'inline-block'; // 显示日期选择器
+        //datePicker.focus(); // 聚焦到日期选择器
+        chooseDateBtn.style.display = 'none'; 
+
+
+
+      // 遍历所有按钮，查找文本为“确定”的按钮      
+const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+if (button.textContent.trim() === '确定' || button.textContent.trim() === '删除') {
+    button.style.display = 'none'; 
+
+}
+    });  
+
+
+    });
+
+        // 将日期选择器和按钮添加到容器中
+        datePickerContainer.appendChild(datePicker);
+        datePickerContainer.appendChild(chooseDateBtn);
+        buttonContainer.appendChild(datePickerContainer); 
                 const saveBtn = document.createElement('button');
                 saveBtn.textContent = '确定';
                 saveBtn.addEventListener('click', () => saveTodoText(todo.id, input.value));
+
                 buttonContainer.appendChild(saveBtn);
                 input.addEventListener('keydown', (event) => {
                     if (event.key === 'Enter') {
@@ -388,18 +536,38 @@
                     editTodoText(todo.id);
                     input.focus(); // 编辑时自动聚焦到输入框
                 });
+
+
+datePicker.addEventListener('change', (event) => {
+    const selectedDate = event.target.value;
+
+    if (selectedDate && editingTodoId !== null) {
+        updateTodoDate(editingTodoId, selectedDate); // 更新待办事项的日期
+
+    }
+    datePicker.style.display = 'none'; // 隐藏日期选择器
+});                
                 buttonContainer.appendChild(editBtn);
+
             }
 
 const deleteBtn = document.createElement('button');
 deleteBtn.textContent = todo.deleteConfirmed ? '确认删除' : '删除';
+datePicker.style.display = 'none';
 deleteBtn.classList.toggle('delete-confirm', todo.deleteConfirmed);
-deleteBtn.addEventListener('click', () => confirmDelete(todo.id));
+deleteBtn.addEventListener('click', () => {
+
+    confirmDelete(todo.id);
+    console.log("点删除");
+    chooseDateBtn.style.display = 'none';
+
+});
 
 // 添加 mouseenter 和 mouseleave 事件监听器
 deleteBtn.addEventListener('mouseenter', () => {
     if (todo.deleteConfirmed) {
         deleteBtn.textContent = '确认删除'; // 鼠标悬停时保持确认删除
+
 
     }
 });
@@ -441,8 +609,7 @@ buttonContainer.appendChild(deleteBtn);
         saveTodos();
         updateDays();
         renderCalendar(); // 重新渲染日历
-        console.log("currentSelectedDate", currentSelectedDate);
-        console.log("targetdate", targetDate);
+
     }
 }
 
@@ -458,10 +625,25 @@ buttonContainer.appendChild(deleteBtn);
             // 不将空的新增待办存储
             todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate] || [];
             todosByDate[currentSelectedDate].push(newTodo);
+            datePicker.style.display = 'none';
             renderTodoList();
 
             const inputFields = document.querySelectorAll('.todo-text');
             inputFields[inputFields.length - 1].focus(); // 光标自动聚焦
+
+
+            const buttons = document.querySelectorAll('button');
+
+    // 遍历所有按钮，查找文本为“确定”的按钮
+    buttons.forEach(button => {
+        if (button.textContent.trim() === '选择日期') {
+            button.style.display = 'none'; 
+        }
+    });  
+
+        
+
+
         }
 
         function toggleComplete(id) {
@@ -487,28 +669,67 @@ buttonContainer.appendChild(deleteBtn);
         return todo;
     }).filter(todo => todo !== null); // 过滤掉空文本的待办
     renderTodoList();
+            chooseDateBtn.style.display = 'none'; // 隐藏 "选择日期" 按钮
+        editingTodoId = null; // 清空编辑中的ID
         }
 
         function editTodoText(id) {
     todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate].map(todo => {
         if (todo.id === id) {
             todo.editing = true;
+            editingTodoId = id; // 保存正在编辑的待办ID
         }
         return todo;
     });
+    chooseDateBtn.style.display = 'none'; // 显示 "选择日期" 按钮
     renderTodoList();
         }
+ function updateTodoDate(id, newDate) {
 
+        // 从当前日期移除该待办事项
+        const todo = todosByDate[currentSelectedDate].find(todo => todo.id === id);
+        if (todo) {
+            // 从当前日期移除该待办事项
+            todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate].filter(todo => todo.id !== id);
+            // 将待办事项添加到新日期
+            todosByDate[newDate] = todosByDate[newDate] || [];
+            todosByDate[newDate].push(todo);
+            currentSelectedDate = newDate; // 更新当前选中的日期
+            renderTodoList();
+              const buttons = document.querySelectorAll('button');
+
+    // 遍历所有按钮，查找文本为“确定”的按钮
+    buttons.forEach(button => {
+        if (button.textContent.trim() === '确定') {
+            button.click(); // 点击按钮
+        }
+    });  
+
+        }
+        chooseDateBtn.style.display = 'none'; // 隐藏 "选择日期" 按钮
+        editingTodoId = null; // 清空编辑中的ID
+    }
         function confirmDelete(id) {
+            
+
+        chooseDateBtn.style.display = 'none'
+
+
+
+
             todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate].map(todo => {
+
                 if (todo.id === id) {
                     if (todo.deleteConfirmed) {
                         return null;
+                        
                     }
                     todo.deleteConfirmed = true;
                 }
+
                 return todo;
             }).filter(todo => todo !== null);
+
             renderTodoList();
         }
 
@@ -560,18 +781,20 @@ function toggleCalendarView() {
     document.getElementById("calendarView").style.display = isCalendarView ? 'block' : 'none';
 // 控制日期导航的显示与隐藏
     document.querySelector('.date-nav').style.display = isCalendarView ? 'none' : 'flex';
-        calendarViewBtn.textContent = isCalendarView ? '周视图' : '日历视图';
+        calendarViewBtn.textContent = isCalendarView ? '🕔️周视图' : '📅日历视图';
             const addTodoButton = document.getElementById("addTodo");
     addTodoButton.style.display = isCalendarView ? 'none' : 'block';
+
 
     if (isCalendarView) {
         renderCalendar();
     }
 
         if (!isCalendarView) {
+            location.reload(); // Reloads the current page
         currentSelectedDate = formatDate(currentDate); // 设置当前选中日期为当前日期
-        renderTodoList(); // 渲染待办事项列表
-        renderCalendar();
+        //renderTodoList();  渲染待办事项列表
+        //renderCalendar();
     }
 }
 
@@ -643,7 +866,7 @@ let clickCount = 0; // 记录点击次数
 
 todoText.addEventListener('dragstart', (e) => {
     isDragging = true; // 设置拖动标志
-    console.log("Is dragging:", isDragging); // 打印拖动状态
+
     handleDragStart(todo); // 拖动开始
 });
 
@@ -656,9 +879,9 @@ dayDiv.addEventListener('mousedown', () => {
 
 todoText.addEventListener('mousedown', () => {
     clickCount++; // 增加点击次数
-    console.log(" clickCount",  clickCount); // 添加调试信息
+
     if (clickCount === 2) { // 检测双击
-        console.log("Double clicked"); // 添加调试信息
+
         if (!isDragging) { // 如果没有拖动，执行双击事件
             toggleComplete(todo.id); // 切换任务状态
             renderCalendar(); // 更新日历视图
@@ -700,7 +923,52 @@ todoText.addEventListener('dragend', () => {
     }
 }
 
+document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.key === '.') {
+        const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
+        let output = '';
 
+        for (const [date, todos] of Object.entries(todosByDate)) {
+            output += `## ${date}\n\n`;
+            todos.forEach(todo => {
+                const completedMarker = todo.completed ? '[x]' : '[ ]';
+                output += `- ${completedMarker} ${todo.text}\n`;
+            });
+            output += '\n'; // 添加空行以分隔日期
+        }
+
+        const newTab = window.open();
+        newTab.document.write('<pre>' + output.trim() + '</pre>');
+        newTab.document.close(); // 关闭文档流以完成页面加载
+
+    } else if (event.ctrlKey && event.key === '/') {
+        const helpTab = window.open();
+        helpTab.document.write(`
+            <html>
+                <head>
+                    <title>使用说明</title>
+                    
+
+
+                </head>
+                <body>
+                    <h1>使用说明</h1>
+                    <p>1. 点击日期可以切换日期，点击<>可以切换上一周、下一周</p>
+                    <p>2. 点击+新增待办</p>
+                    <p>3. 点击编辑按钮修改待办内容</p>
+                    <p>4. 点击选择日期，可以将任务移动到其他日期</p>
+                    <p>5. 可以拖动任务到其他日期</p>
+                    <p>6. 前期未完成的任务会自动转移到今天，已完成的不会转移</p>
+                    <p>7. 点击日历视图可以看整个月已完成、未完成的任务</p>
+                    <p>8. 日历视图下，可以拖动改变任务日期</p>
+                    <p>9. ctrl+. 可以以markdown格式导出所有任务</p>
+                    <p>10. ctrl+/ 可以显示说明 </p>
+                </body>
+            </html>
+        `);
+        helpTab.document.close(); // 关闭文档流以完成页面加载
+    }
+});
 
     </script>
 </body>
