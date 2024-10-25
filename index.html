@@ -845,14 +845,14 @@ function renderCalendar() {
         }
 
         // 添加待办事项
-        const formattedDate = `${year}-${month + 1}-${day}`;
-        const todos = todosByDate[formattedDate] || [];
-        todos.forEach(todo => {
-            const todoText = document.createElement('div');
-            todoText.textContent = todo.text;
-            if (todo.completed) {
-                todoText.classList.add('completed');
-            }
+const formattedDate = `${year}-${month + 1}-${day}`;
+const todos = todosByDate[formattedDate] || [];
+todos.forEach(todo => {
+    const todoText = document.createElement('div');
+    todoText.textContent = `· ${todo.text}`; // 添加符号
+    if (todo.completed) {
+        todoText.classList.add('completed');
+    }
  // 设置为可拖动
 
             todoText.setAttribute('draggable', true);
