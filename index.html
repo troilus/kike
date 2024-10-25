@@ -183,6 +183,7 @@ padding-top: 15px;
     background-color: #fffeaa; /* 今日的背景 */
     color: black; /* 反色显示 */
     font-size: 12px;
+    white-space: nowrap;
 }
 .calendar-nav {
     display: flex;
@@ -220,6 +221,8 @@ padding-top: 15px;
     padding: 10px;
     position: relative;
         font-size: 12px;
+    white-space: nowrap;         /* 禁用换行 */
+    overflow: hidden;           /* 隐藏溢出的内容 */
 }
         #addTodo {
             width: 100%;
@@ -485,6 +488,7 @@ padding-top: 15px;
 
             if (todo.editing) {
                 todoElement.classList.add('editing');
+                            todoElement.setAttribute('draggable', false);
 
     // 创建选择日期按钮
     const chooseDateBtn = document.createElement('button');
