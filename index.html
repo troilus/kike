@@ -240,12 +240,14 @@
 </head>
 <body>
     <!-- 日期导航部分 -->
+    <span id="yearDisplay"></span> <!-- 用于显示年份 -->
     <div class="date-nav">
         <span class="arrow" id="prevDay">&lt;</span>
         <div class="days" id="daysContainer">
             <!-- 日期将会动态生成 -->
         </div>
         <span class="arrow" id="nextDay">&gt;</span>
+
     </div>
     <!-- 待办列表部分 -->
     <div class="todo-container" id="todoContainer">
@@ -275,6 +277,7 @@
     <input type="date" id="datePicker" style="display: none;">
     <button id="addTodo">➕</button>
     <button id="calendarViewBtn">📅日历视图</button>
+
     <script>
         // 获取元素
             const chooseDateBtn = document.getElementById('chooseDateBtn');
@@ -361,50 +364,58 @@
         
                 // 生成7天的日期显示 (始终以周一为开始)
                 function updateDays() {
-        daysContainer.innerHTML = '';
-        const dayOfWeek = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        let tempDate = new Date(currentDate);
-        const dayOffset = tempDate.getDay() === 0 ? 6 : tempDate.getDay() - 1;
-        tempDate.setDate(tempDate.getDate() - dayOffset); // 回到周一
-        
-        for (let i = 0; i < 7; i++) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'day';
-            const formattedDate = formatDate(tempDate);
-        
-            dayDiv.innerHTML = `${dayOfWeek[tempDate.getDay()]}<br>${tempDate.getMonth() + 1}-${tempDate.getDate()}`;
-            dayDiv.setAttribute("data-date", formattedDate);
-        
-            const pendingTodos = (todosByDate[formattedDate] || []).filter(todo => !todo.completed).length;
-            if (pendingTodos > 0) {
-                const badge = document.createElement('span');
-                badge.className = 'badge';
-                badge.textContent = pendingTodos;
-                dayDiv.appendChild(badge);
-            }
-        
-            dayDiv.addEventListener('dragover', (e) => e.preventDefault());
-            dayDiv.addEventListener('drop', (e) => handleDrop(e, formattedDate));
-            dayDiv.addEventListener('click', (e) => {
-                const selectedDate = e.target.getAttribute("data-date");
-                Array.from(daysContainer.children).forEach(d => d.classList.remove('active'));
-                e.target.classList.add('active');
-        
-                showTodoList(selectedDate);
-            });
-        
-            if (formattedDate === formatDate(new Date())) {
-                dayDiv.classList.add('today');
-            }
-        
-            if (formattedDate === currentSelectedDate) {
-                dayDiv.classList.add('active');
-            }
-        
-            daysContainer.appendChild(dayDiv);
-            tempDate.setDate(tempDate.getDate() + 1);
+    daysContainer.innerHTML = '';
+
+        // 设置年份显示
+        const yearDisplay = document.getElementById("yearDisplay");
+    yearDisplay.textContent = currentDate.getFullYear(); // 获取当前显示年份并更新
+    
+    const dayOfWeek = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    let tempDate = new Date(currentDate);
+    const dayOffset = tempDate.getDay() === 0 ? 6 : tempDate.getDay() - 1;
+    tempDate.setDate(tempDate.getDate() - dayOffset); // 回到周一
+
+    for (let i = 0; i < 7; i++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day';
+        const formattedDate = formatDate(tempDate);
+
+        dayDiv.innerHTML = `${dayOfWeek[tempDate.getDay()]}<br>${tempDate.getMonth() + 1}-${tempDate.getDate()}`;
+        dayDiv.setAttribute("data-date", formattedDate);
+
+        const pendingTodos = (todosByDate[formattedDate] || []).filter(todo => !todo.completed).length;
+        if (pendingTodos > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = pendingTodos;
+            dayDiv.appendChild(badge);
         }
-                }
+
+        dayDiv.addEventListener('dragover', (e) => e.preventDefault());
+        dayDiv.addEventListener('drop', (e) => handleDrop(e, formattedDate));
+        dayDiv.addEventListener('click', (e) => {
+            const selectedDate = e.target.getAttribute("data-date");
+            Array.from(daysContainer.children).forEach(d => d.classList.remove('active'));
+            e.target.classList.add('active');
+
+            showTodoList(selectedDate);
+        });
+
+        // 重新检查今天日期的标记
+        if (formattedDate === formatDate(new Date())) {
+            dayDiv.classList.add('today');
+        }
+
+        // 确保新选择的日期高亮显示
+        if (formattedDate === currentSelectedDate) {
+            dayDiv.classList.add('active');
+        }
+
+        daysContainer.appendChild(dayDiv);
+        tempDate.setDate(tempDate.getDate() + 1);
+    }
+}
+
         
                 function showTodoList(date) {
         currentSelectedDate = date;
@@ -685,6 +696,32 @@
         todosByDate[newDate] = todosByDate[newDate] || [];
         todosByDate[newDate].push(todo);
         currentSelectedDate = newDate; // 更新当前选中的日期
+
+
+
+// 检查新日期是否在当前周内
+const selectedDateObj = new Date(newDate);
+        const startOfWeek = new Date(currentDate);
+        const dayOffset = startOfWeek.getDay() === 0 ? 6 : startOfWeek.getDay() - 1;
+        startOfWeek.setDate(startOfWeek.getDate() - dayOffset);  // 当前周的起始日期
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(endOfWeek.getDate() + 6);  // 当前周的结束日期
+
+        if (selectedDateObj < startOfWeek || selectedDateObj > endOfWeek) {
+            // 如果新日期不在当前显示的周内，更新currentDate为新日期所在周的起始
+            currentDate = new Date(selectedDateObj);
+            currentDate.setDate(currentDate.getDate() - (currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1));
+        }
+
+
+
+
+
+
+
+
+        updateDays();
         renderTodoList();
           const buttons = document.querySelectorAll('button');
         
