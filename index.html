@@ -880,7 +880,7 @@ const selectedDateObj = new Date(newDate);
                 }
         
                 // 添加待办事项
-        const formattedDate = `${year}-${month + 1}-${day}`;
+        const formattedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
         const todos = todosByDate[formattedDate] || [];
         todos.forEach(todo => {
             const todoText = document.createElement('div');
