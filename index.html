@@ -296,6 +296,16 @@
     <button id="calendarViewBtn">📅日历视图</button>
 
     <script>
+        var gistUrl = 'https://api.github.com/gists/xxxxxxxx'; // 替换为你的 Gist URL，在这里创建一个secret gist： https://gist.github.com/
+        var token = 'ghp_xxxxxxxx'; // 替换为你的 GitHub 访问令牌，在这里创建一个令牌，只用给gist权限：https://github.com/settings/tokens/new
+        
+        var backuptab = true; // 设置新标签页文本显示开关
+        var backupgist = true; // 设置gist备份开关
+        var backupmd = true; // 设置md文件备份开关
+
+
+
+
         // 获取元素
             const chooseDateBtn = document.getElementById('chooseDateBtn');
             const datePicker = document.getElementById('datePicker');
@@ -964,9 +974,7 @@ const selectedDateObj = new Date(newDate);
         }
         
         document.addEventListener('keydown', function(event) {
-            const backuptab = true; // 设置新标签页文本显示开关
-            const backupgist = true; // 设置gist备份开关
-            const backupmd = true; // 设置md文件备份开关
+
 
 
             if (event.ctrlKey && event.key === '.') {
@@ -1038,9 +1046,9 @@ const selectedDateObj = new Date(newDate);
                 <p>6. 前期未完成的任务会自动转移到今天，已完成的不会转移</p>
                 <p>7. 点击日历视图可以看整个月已完成、未完成的任务</p>
                 <p>8. 日历视图下，可以拖动改变任务日期</p>
-                <p>9. ctrl+. 可以以markdown格式导出所有任务</p>
+                <p>9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务（注意在301~303行修改导出方式，如果要备份到gist，注意在299、300行修改gist地址和token）</p>
                 <p>10. ctrl+/ 可以显示说明 </p>
-                <p>11. ctrl+, 可以导入任务（格式同9导出的） </p>
+                <p>11. “ctrl+shift+,” 可以导入任务（格式必须同9导出的） </p>
             </body>
         </html>
                 `);
@@ -1060,9 +1068,20 @@ const selectedDateObj = new Date(newDate);
                 }
             }
         });
+
+
+        document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.shiftKey && event.key === '>') {
+        // 读取 Gist 内容
+        fetchGistContent();
+    }
+})
+
+
         
         function importTodos(input) {
             const todosByDate = {};
+            let currentId = 1;
         
             // 按行分割输入内容
             const lines = input.split('\n');
@@ -1085,7 +1104,7 @@ const selectedDateObj = new Date(newDate);
         
         // 添加待办事项（忽略 ID）
         todosByDate[currentDate].push({
-            id: Date.now(), // 生成新 ID
+            id: currentId++, // 生成新 ID
             text: text,
             completed: completed
         });
@@ -1095,14 +1114,16 @@ const selectedDateObj = new Date(newDate);
             // 存储到 localStorage
             localStorage.setItem('todosByDate', JSON.stringify(todosByDate));
             console.log('待办事项已导入:', todosByDate);
-             location.reload();
+            //location.reload();
         }
+
+
         
 function syncToGist(content) {
         const statusElement = document.getElementById('upload-status'); // 获取状态元素
-    statusElement.textContent = '上传Gist中 ⏫'; // 设置初始状态
-            const gistUrl = 'https://api.github.com/gists/12345678901234567890qwertyuiopad'; // 替换为你的 Gist URL，在这里创建一个secret gist： https://gist.github.com/
-        const token = 'ghp_abcvbnmlkjhhgffdsaqwer'; // 替换为你的 GitHub 访问令牌，在这里创建一个令牌，只用给gist权限：https://github.com/settings/tokens/new
+
+    statusElement.textContent = '⏫正在将数据上传Gist '; // 设置初始状态
+
     fetch(gistUrl, {
         method: 'PATCH',
         headers: {
@@ -1128,7 +1149,7 @@ function syncToGist(content) {
         statusElement.textContent = `${currentTime} ✅ Gist上传成功`; // 显示成功状态
         setTimeout(() => {
         statusElement.textContent = ''; // 10秒后清空状态
-        }, 10000); // 10000毫秒 = 10秒
+        }, 5000); // 10000毫秒 = 10秒
         console.log('Gist updated:', data.html_url);
     })
     .catch(error => {
@@ -1138,6 +1159,40 @@ function syncToGist(content) {
     });
 }
 
+
+// 从 Gist 获取内容的函数
+function fetchGistContent() {
+    const statusElement = document.getElementById('upload-status'); // 获取状态元素
+    statusElement.textContent = '⏬正在从Gist下载数据'; // 设置初始状态
+    fetch(gistUrl, {
+        method: 'GET', // 指定请求方法
+        headers: {
+            'Authorization': `token ${token}`
+        },
+        cache: 'no-cache' // 忽略缓存，强制请求最新数据
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch Gist content');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const content = data.files['todos.md'].content; // 获取文件内容
+        console.log('Fetched content from Gist:', content); // 输出内容
+        importTodos(content)
+        const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+        statusElement.textContent = `${currentTime} ✅从Gist读取成功`; // 显示失败状态
+        loadTodos();
+        renderTodoList();
+        setTimeout(() => {
+        statusElement.textContent = ''
+        }, 5000); // 10000毫秒 = 10秒
+    })
+    .catch(error => {
+        console.error('Error fetching Gist content:', error);
+    });
+}
 
 
         
