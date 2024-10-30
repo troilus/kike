@@ -964,9 +964,9 @@ const selectedDateObj = new Date(newDate);
         }
         
         document.addEventListener('keydown', function(event) {
-            const backuptab = false; // 设置新标签页文本显示开关
+            const backuptab = true; // 设置新标签页文本显示开关
             const backupgist = true; // 设置gist备份开关
-            const backupmd = false; // 设置md文件备份开关
+            const backupmd = true; // 设置md文件备份开关
 
 
             if (event.ctrlKey && event.key === '.') {
