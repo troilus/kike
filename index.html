@@ -967,14 +967,19 @@ const selectedDateObj = new Date(newDate);
                 const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
                 let output = '';
         
-                for (const [date, todos] of Object.entries(todosByDate)) {
-        output += `## ${date}\n\n`;
-        todos.forEach(todo => {
-            const completedMarker = todo.completed ? '[x]' : '[ ]';
-            output += `- ${completedMarker} ${todo.text}\n`;
-        });
-        output += '\n'; // 添加空行以分隔日期
-                }
+        // 获取日期并排序
+        const sortedDates = Object.keys(todosByDate).sort((a, b) => new Date(a) - new Date(b));
+        
+        // 遍历排序后的日期
+               for (const date of sortedDates) {
+                   output += `## ${date}\n\n`;
+                   const todos = todosByDate[date];
+                   todos.forEach(todo => {
+                       const completedMarker = todo.completed ? '[x]' : '[ ]';
+                       output += `- ${completedMarker} ${todo.text}\n`;
+                   });
+                   output += '\n'; // 添加空行以分隔日期
+               }
         
                 const newTab = window.open();
                 newTab.document.write('<pre>' + output.trim() + '</pre>');
