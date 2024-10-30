@@ -5,13 +5,13 @@
 
 https://troilus.github.io/kike/
 
-周
+- 周
 ![image](https://github.com/user-attachments/assets/e6b7c600-5ff3-4857-b234-c1846e1d40ec)
 
-月
+- 月
 ![image](https://github.com/user-attachments/assets/96add108-a637-43c6-9ed0-435a9b92a2b3)
 
-导出
+- 导出
 ![image](https://github.com/user-attachments/assets/97e90f0f-550c-4842-ae05-9467755483aa)
 
 
@@ -26,6 +26,8 @@ https://troilus.github.io/kike/
 6. 前期未完成的任务会自动转移到今天，已完成的不会转移
 7. 点击日历视图可以看整个月已完成、未完成的任务
 8. 日历视图下，可以拖动改变任务日期
-9. ctrl+. 可以以markdown格式导出所有任务
+9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务
+   1.  注意在967~969行修改导出方式
+   2.  如果要备份到gist，注意在1104、1105行修改gist地址和token
 10. ctrl+/ 可以显示使用说明
-11. ctrl+, 可以导入任务（格式同9导出的）
+11. ctrl+, 可以导入任务（格式必须同9导出的）

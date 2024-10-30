@@ -257,6 +257,7 @@
     <!-- 日期导航部分 -->
     <div class="date-nav">
         <div id="yearDisplay" class="year-line"></div> <!-- 显示年份的第一行 -->
+        <div id="upload-status" class="year-line"></div>
         <div class="date-line">
             <span class="arrow" id="prevDay">&lt;</span>
             <div class="days" id="daysContainer">
@@ -963,27 +964,59 @@ const selectedDateObj = new Date(newDate);
         }
         
         document.addEventListener('keydown', function(event) {
+            const backuptab = false; // 设置新标签页文本显示开关
+            const backupgist = true; // 设置gist备份开关
+            const backupmd = false; // 设置md文件备份开关
+
+
             if (event.ctrlKey && event.key === '.') {
                 const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
                 let output = '';
-        
-        // 获取日期并排序
+ // 获取日期并排序
         const sortedDates = Object.keys(todosByDate).sort((a, b) => new Date(a) - new Date(b));
         
-        // 遍历排序后的日期
-               for (const date of sortedDates) {
-                   output += `## ${date}\n\n`;
-                   const todos = todosByDate[date];
-                   todos.forEach(todo => {
-                       const completedMarker = todo.completed ? '[x]' : '[ ]';
-                       output += `- ${completedMarker} ${todo.text}\n`;
-                   });
-                   output += '\n'; // 添加空行以分隔日期
-               }
-        
+ // 遍历排序后的日期
+        for (const date of sortedDates) {
+            output += `## ${date}\n\n`;
+            const todos = todosByDate[date];
+            todos.forEach(todo => {
+                const completedMarker = todo.completed ? '[x]' : '[ ]';
+                output += `- ${completedMarker} ${todo.text}\n`;
+            });
+            output += '\n'; // 添加空行以分隔日期
+        }
+
+
+           if (backuptab){
                 const newTab = window.open();
                 newTab.document.write('<pre>' + output.trim() + '</pre>');
                 newTab.document.close(); // 关闭文档流以完成页面加载
+                    }
+
+           if (backupmd) {
+        const today = new Date().toISOString().split('T')[0]; // 获取今日日期
+        const blob = new Blob([output.trim()], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `备份于${today}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+
+
+
+
+
+                if (backupgist) {
+            syncToGist(output.trim());
+            console.log("开始备份")
+        }
+
+
         
             } else if (event.ctrlKey && event.key === '/') {
                 const helpTab = window.open();
@@ -1065,6 +1098,48 @@ const selectedDateObj = new Date(newDate);
              location.reload();
         }
         
+function syncToGist(content) {
+        const statusElement = document.getElementById('upload-status'); // 获取状态元素
+    statusElement.textContent = '上传Gist中 ⏫'; // 设置初始状态
+            const gistUrl = 'https://api.github.com/gists/12345678901234567890qwertyuiopad'; // 替换为你的 Gist URL，在这里创建一个secret gist： https://gist.github.com/
+        const token = 'ghp_abcvbnmlkjhhgffdsaqwer'; // 替换为你的 GitHub 访问令牌，在这里创建一个令牌，只用给gist权限：https://github.com/settings/tokens/new
+    fetch(gistUrl, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            files: {
+                'todos.md': {
+                    content: content
+                }
+            }
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to sync with Gist');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+        statusElement.textContent = `${currentTime} ✅ Gist上传成功`; // 显示成功状态
+        setTimeout(() => {
+        statusElement.textContent = ''; // 10秒后清空状态
+        }, 10000); // 10000毫秒 = 10秒
+        console.log('Gist updated:', data.html_url);
+    })
+    .catch(error => {
+        const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+        statusElement.textContent = `${currentTime} ❌ Gist上传失败`; // 显示失败状态
+        console.error('Error syncing with Gist:', error);
+    });
+}
+
+
+
         
     </script>
 </body>
