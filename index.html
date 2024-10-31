@@ -23,7 +23,13 @@
             background-color: #ff7680; /* 和 + 按钮一样的悬停效果 */
         }
         
-        
+        .status {
+
+    font-size: 14px;
+    text-align: right;
+    padding-top: 10px;
+
+}
         
         
         body {
@@ -49,7 +55,7 @@
 
 .year-line {
     font-weight: bold;
-    font-size: 11px;
+    font-size: 12px;
     align-self: baseline;
 }
 
@@ -257,7 +263,7 @@
     <!-- 日期导航部分 -->
     <div class="date-nav">
         <div id="yearDisplay" class="year-line"></div> <!-- 显示年份的第一行 -->
-        <div id="upload-status" class="year-line"></div>
+        
         <div class="date-line">
             <span class="arrow" id="prevDay">&lt;</span>
             <div class="days" id="daysContainer">
@@ -266,6 +272,7 @@
             <span class="arrow" id="nextDay">&gt;</span>
         </div>
     </div>
+
     <!-- 待办列表部分 -->
     <div class="todo-container" id="todoContainer">
         <!-- 待办事项将会在这里生成 -->
@@ -294,14 +301,15 @@
     <input type="date" id="datePicker" style="display: none;">
     <button id="addTodo">➕</button>
     <button id="calendarViewBtn">📅日历视图</button>
+    <div id="upload-status" class="status"></div>
 
     <script>
-        var gistUrl = 'https://api.github.com/gists/xxxxxxxx'; // 替换为你的 Gist URL，在这里创建一个secret gist： https://gist.github.com/
-        var token = 'ghp_xxxxxxxx'; // 替换为你的 GitHub 访问令牌，在这里创建一个令牌，只用给gist权限：https://github.com/settings/tokens/new
-        
-        var backuptab = true; // 设置新标签页文本显示开关
-        var backupgist = true; // 设置gist备份开关
-        var backupmd = true; // 设置md文件备份开关
+        var gistUrl = 'https://api.github.com/gists/xxxxxxxxxx'; // 替换为你的 Gist URL，在这里创建一个secret gist： https://gist.github.com/
+        var token = 'ghp_xxxxxxxxxx'; // 替换为你的 GitHub 访问令牌，在这里创建一个令牌，只用给gist权限：https://github.com/settings/tokens/new
+            var backuptab = false; // 设置新标签页文本显示开关
+            var backupgist = true; // 设置gist备份开关
+            var backupgistcycle = 120000 // 设置gist自动备份间隔，毫秒单位，小于60秒将不启用自动gist备份
+            var backupmd = false; // 设置md文件备份开关
 
 
 
@@ -841,8 +849,10 @@ const selectedDateObj = new Date(newDate);
             }
         
                 if (!isCalendarView) {
-        location.reload(); // Reloads the current page
+                //location.reload(); // Reloads the current page
                 currentSelectedDate = formatDate(currentDate); // 设置当前选中日期为当前日期
+                            updateDays();
+            renderTodoList()
                 //renderTodoList();  渲染待办事项列表
                 //renderCalendar();
             }
@@ -972,12 +982,7 @@ const selectedDateObj = new Date(newDate);
                 calendarBody.appendChild(dayDiv);
             }
         }
-        
-        document.addEventListener('keydown', function(event) {
-
-
-
-            if (event.ctrlKey && event.key === '.') {
+function backup() {
                 const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
                 let output = '';
  // 获取日期并排序
@@ -1014,18 +1019,23 @@ const selectedDateObj = new Date(newDate);
         URL.revokeObjectURL(url);
     }
 
-
-
-
-
-
                 if (backupgist) {
             syncToGist(output.trim());
             console.log("开始备份")
         }
 
+}        
+        document.addEventListener('keydown', function(event) {
 
-        
+
+
+
+
+
+            if (event.ctrlKey && event.key === '.') {
+
+                backup();
+
             } else if (event.ctrlKey && event.key === '/') {
                 const helpTab = window.open();
                 helpTab.document.write(`
@@ -1046,9 +1056,9 @@ const selectedDateObj = new Date(newDate);
                 <p>6. 前期未完成的任务会自动转移到今天，已完成的不会转移</p>
                 <p>7. 点击日历视图可以看整个月已完成、未完成的任务</p>
                 <p>8. 日历视图下，可以拖动改变任务日期</p>
-                <p>9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务（注意在301~303行修改导出方式，如果要备份到gist，注意在299、300行修改gist地址和token）</p>
+                <p>9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务（注意在967~969行修改导出方式，如果要备份到gist，注意在1104、1105行修改gist地址和token）</p>
                 <p>10. ctrl+/ 可以显示说明 </p>
-                <p>11. “ctrl+shift+,” 可以导入任务（格式必须同9导出的） </p>
+                <p>11. ctrl+, 可以导入任务（格式必须同9导出的） </p>
             </body>
         </html>
                 `);
@@ -1071,7 +1081,7 @@ const selectedDateObj = new Date(newDate);
 
 
         document.addEventListener('keydown', function(event) {
-    if (event.ctrlKey && event.shiftKey && event.key === '>') {
+    if (event.ctrlKey && event.key === '>') {
         // 读取 Gist 内容
         fetchGistContent();
     }
@@ -1114,15 +1124,16 @@ const selectedDateObj = new Date(newDate);
             // 存储到 localStorage
             localStorage.setItem('todosByDate', JSON.stringify(todosByDate));
             console.log('待办事项已导入:', todosByDate);
+
             //location.reload();
         }
 
 
         
 function syncToGist(content) {
-        const statusElement = document.getElementById('upload-status'); // 获取状态元素
-
-    statusElement.textContent = '⏫正在将数据上传Gist '; // 设置初始状态
+    const statusElement = document.getElementById('upload-status'); // 获取状态元素
+    const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+    statusElement.textContent = `${currentTime} ⏫正在将数据上传Gist`; // 设置初始状态
 
     fetch(gistUrl, {
         method: 'PATCH',
@@ -1147,9 +1158,9 @@ function syncToGist(content) {
     .then(data => {
         const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
         statusElement.textContent = `${currentTime} ✅ Gist上传成功`; // 显示成功状态
-        setTimeout(() => {
-        statusElement.textContent = ''; // 10秒后清空状态
-        }, 5000); // 10000毫秒 = 10秒
+        //setTimeout(() => {
+        //statusElement.textContent = ''; // 10秒后清空状态
+        //}, 5000); // 10000毫秒 = 10秒
         console.log('Gist updated:', data.html_url);
     })
     .catch(error => {
@@ -1163,7 +1174,8 @@ function syncToGist(content) {
 // 从 Gist 获取内容的函数
 function fetchGistContent() {
     const statusElement = document.getElementById('upload-status'); // 获取状态元素
-    statusElement.textContent = '⏬正在从Gist下载数据'; // 设置初始状态
+     const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+    statusElement.textContent = `${currentTime} ⏬正在从Gist下载数据`; // 设置初始状态
     fetch(gistUrl, {
         method: 'GET', // 指定请求方法
         headers: {
@@ -1193,6 +1205,31 @@ function fetchGistContent() {
         console.error('Error fetching Gist content:', error);
     });
 }
+
+
+window.onload = function() {
+    const statusElement = document.getElementById('upload-status'); // 获取状态元素
+
+      if (backupgistcycle > 60000) {
+        const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+        statusElement.textContent = `${currentTime} 🔁已启用自动上传Gist（间隔 ${backupgistcycle/1000} 秒） `; // 设置初始状态
+        setTimeout(() => {
+        backup();
+        }, 5000); // 10000毫秒 = 10秒
+
+        setInterval(backup, backupgistcycle);
+      } else {
+        const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+        statusElement.textContent = `${currentTime} ℹ未启用自动上传Gist，请注意手动备份`; // 设置初始状态
+        setTimeout(() => {
+        statusElement.textContent = ''; // 10秒后清空状态
+        }, 5000); // 10000毫秒 = 10秒
+      }
+    };
+
+
+
+
 
 
         
