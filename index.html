@@ -1210,7 +1210,7 @@ function fetchGistContent() {
 window.onload = function() {
     const statusElement = document.getElementById('upload-status'); // 获取状态元素
 
-      if (backupgistcycle > 60000) {
+      if (backupgistcycle > 60000 && backupgist === true ) {
         const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
         statusElement.textContent = `${currentTime} 🔁已启用自动上传Gist（间隔 ${backupgistcycle/1000} 秒） `; // 设置初始状态
         setTimeout(() => {
