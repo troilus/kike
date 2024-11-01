@@ -256,10 +256,103 @@
         #addTodo:hover {
             background-color: #b9e563
         }
+
+
+        #config-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    /*box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);*/
+    width: 600px;
+    height: 311px; /* 固定高度为600px */
+    overflow: hidden; /* 防止内容溢出 */
+
+
+}
+
+#config-modal label {
+    display: block;
+    margin-top: 10px;
+}
+
+#config-modal .indented-section {
+    margin-left: 20px; /* 缩进20px */
+}
+
+#save-config {
+    position: absolute; /* 绝对定位 */
+    bottom: 10px; /* 距离底部10px */
+    left: 50%; /* 水平居中 */
+    transform: translateX(-50%); /* 通过平移来实现居中 */
+
+    padding: 10px 20px;
+    background-color: #A5DE37;
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    outline: -webkit-focus-ring-color auto 1px;
+}
+
+#save-config:hover {
+    background-color: #b9e563;
+    
+}
+
+
+
         
     </style>
 </head>
 <body>
+        <!-- 设置部分 -->
+        <div id="config-modal">
+            <!-- Main options -->
+            <label>ℹ️ Ctrl + / 显示帮助信息</label>
+            <label><input type="checkbox" id="md-export"> 启用md文件导出（快捷键 Ctrl + . 下载md文件）</label>
+            <label><input type="checkbox" id="new-tab-export"> 启用新标签页导出（快捷键 Ctrl + . 打开新标签页）</label>
+            <label><input type="checkbox" id="gist-sync"> 启用Gist上传下载（手动上传快捷键 Ctrl + .  手动下载快捷键 Ctrl + Shift + . ）</label>
+            <div id="gist-options" style="display: none;">
+                <div class="indented-section">
+    
+                    <label>
+                        Gist_地址:
+                        <input type="text" style="height: auto;width: 290px;"" id="gist-url" placeholder="https://api.github.com/gists/xxxxxxxxxx">
+                    </label>
+                    <label>
+                        Gist_Token:
+                        <input type="text" style="height: auto;width: 280px;" id="gist-token" placeholder="ghp_xxxxxxxxxx">
+                    </label>
+    
+                
+                
+                <label><input type="checkbox" id="auto-upload"> 启用自动Gist自动上传（在新设备使用时请先启用Gist上传下载并按下 Ctrl + Shift + . 手动下载Gist内容，避免覆盖线上内容）</label>
+                <div class="indented-section">
+                    <div id="gist-options2" style="display: none;">
+                        <label>
+                            自动上传间隔（分钟）:
+                            <input type="number" style="height: auto;width: 50px;" id="upload-interval" min="600" placeholder=">=5">
+                        </label>
+                    </div>
+                </div>
+            </div>
+            </div>
+    
+    
+            
+            <!-- Conditional options for gist sync -->
+    
+    
+            <!-- Save and exit button -->
+            <button id="save-config">保存并退出</button>
+        </div>
+    
     <!-- 日期导航部分 -->
     <div class="date-nav">
         <div id="yearDisplay" class="year-line"></div> <!-- 显示年份的第一行 -->
@@ -303,13 +396,20 @@
     <button id="calendarViewBtn">📅日历视图</button>
     <div id="upload-status" class="status"></div>
 
+
+
+
+
+
+
+
     <script>
-        var gistUrl = 'https://api.github.com/gists/xxxxxxxxxx'; // 替换为你的 Gist URL，在这里创建一个secret gist： https://gist.github.com/
-        var token = 'ghp_xxxxxxxxxx'; // 替换为你的 GitHub 访问令牌，在这里创建一个令牌，只用给gist权限：https://github.com/settings/tokens/new
-            var backuptab = false; // 设置新标签页文本显示开关
-            var backupgist = true; // 设置gist备份开关
-            var backupgistcycle = 120000 // 设置gist自动备份间隔，毫秒单位，小于60秒将不启用自动gist备份
-            var backupmd = false; // 设置md文件备份开关
+        //var gistUrl = 'https://api.github.com/gists/xxxxxxxxxx'; // 替换为你的 Gist URL，在这里创建一个secret gist： https://gist.github.com/
+        //var token = 'ghp_xxxxxxxxxx'; // 替换为你的 GitHub 访问令牌，在这里创建一个令牌，只用给gist权限：https://github.com/settings/tokens/new
+            //var backuptab = false; // 设置新标签页文本显示开关
+            //var backupgist = false // 设置gist备份开关
+            //var backupgistcycle = 120000 // 设置gist自动备份间隔，毫秒单位，小于60秒将不启用自动gist备份
+            //var backupmd = false; // 设置md文件备份开关
 
 
 
@@ -982,7 +1082,8 @@ const selectedDateObj = new Date(newDate);
                 calendarBody.appendChild(dayDiv);
             }
         }
-function backup() {
+function backupmdornewtab() {
+    
                 const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
                 let output = '';
  // 获取日期并排序
@@ -1000,13 +1101,13 @@ function backup() {
         }
 
 
-           if (backuptab){
+           if (globalConfig.backuptab){
                 const newTab = window.open();
                 newTab.document.write('<pre>' + output.trim() + '</pre>');
                 newTab.document.close(); // 关闭文档流以完成页面加载
                     }
 
-           if (backupmd) {
+           if (globalConfig.backupmd) {
         const today = new Date().toISOString().split('T')[0]; // 获取今日日期
         const blob = new Blob([output.trim()], { type: 'text/markdown' });
         const url = URL.createObjectURL(blob);
@@ -1019,12 +1120,34 @@ function backup() {
         URL.revokeObjectURL(url);
     }
 
-                if (backupgist) {
+
+}     
+function backup2gist() {
+    const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
+                let output = '';
+ // 获取日期并排序
+        const sortedDates = Object.keys(todosByDate).sort((a, b) => new Date(a) - new Date(b));
+        
+ // 遍历排序后的日期
+        for (const date of sortedDates) {
+            output += `## ${date}\n\n`;
+            const todos = todosByDate[date];
+            todos.forEach(todo => {
+                const completedMarker = todo.completed ? '[x]' : '[ ]';
+                output += `- ${completedMarker} ${todo.text}\n`;
+            });
+            output += '\n'; // 添加空行以分隔日期
+        }
+
+
+    if (globalConfig.backupgist) {
             syncToGist(output.trim());
             console.log("开始备份")
         }
+    
+    
 
-}        
+}
         document.addEventListener('keydown', function(event) {
 
 
@@ -1032,9 +1155,10 @@ function backup() {
 
 
 
-            if (event.ctrlKey && event.key === '.') {
+            if (event.ctrlKey && event.key === '.' ) {
 
-                backup();
+                backupmdornewtab();
+                backup2gist();
 
             } else if (event.ctrlKey && event.key === '/') {
                 const helpTab = window.open();
@@ -1056,7 +1180,7 @@ function backup() {
                 <p>6. 前期未完成的任务会自动转移到今天，已完成的不会转移</p>
                 <p>7. 点击日历视图可以看整个月已完成、未完成的任务</p>
                 <p>8. 日历视图下，可以拖动改变任务日期</p>
-                <p>9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务（注意在967~969行修改导出方式，如果要备份到gist，注意在1104、1105行修改gist地址和token）</p>
+                <p>9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务</p>
                 <p>10. ctrl+/ 可以显示说明 </p>
                 <p>11. ctrl+, 可以导入任务（格式必须同9导出的） </p>
             </body>
@@ -1081,7 +1205,7 @@ function backup() {
 
 
         document.addEventListener('keydown', function(event) {
-    if (event.ctrlKey && event.key === '>') {
+    if (event.ctrlKey  && event.key === '>' && globalConfig.backupgist === true) {
         // 读取 Gist 内容
         fetchGistContent();
     }
@@ -1135,10 +1259,10 @@ function syncToGist(content) {
     const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
     statusElement.textContent = `${currentTime} ⏫正在将数据上传Gist`; // 设置初始状态
 
-    fetch(gistUrl, {
+    fetch(globalConfig.gistUrl, {
         method: 'PATCH',
         headers: {
-            'Authorization': `token ${token}`,
+            'Authorization': `token ${globalConfig.token}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -1165,7 +1289,7 @@ function syncToGist(content) {
     })
     .catch(error => {
         const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
-        statusElement.textContent = `${currentTime} ❌ Gist上传失败`; // 显示失败状态
+        statusElement.textContent = `${currentTime} ❌ Gist上传失败，请检查设置`; // 显示失败状态
         console.error('Error syncing with Gist:', error);
     });
 }
@@ -1174,18 +1298,20 @@ function syncToGist(content) {
 // 从 Gist 获取内容的函数
 function fetchGistContent() {
     const statusElement = document.getElementById('upload-status'); // 获取状态元素
-     const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+    const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+    
     statusElement.textContent = `${currentTime} ⏬正在从Gist下载数据`; // 设置初始状态
-    fetch(gistUrl, {
+    fetch(globalConfig.gistUrl, {
         method: 'GET', // 指定请求方法
         headers: {
-            'Authorization': `token ${token}`
+            'Authorization': `token ${globalConfig.token}`
         },
         cache: 'no-cache' // 忽略缓存，强制请求最新数据
     })
     .then(response => {
         if (!response.ok) {
             throw new Error('Failed to fetch Gist content');
+            statusElement.textContent = `${currentTime} ❌ Gist下载失败，请检查设置`; // 
         }
         return response.json();
     })
@@ -1203,33 +1329,126 @@ function fetchGistContent() {
     })
     .catch(error => {
         console.error('Error fetching Gist content:', error);
+        statusElement.textContent = `${currentTime} ❌ Gist下载失败，请检查设置`; // 
     });
 }
 
 
-window.onload = function() {
-    const statusElement = document.getElementById('upload-status'); // 获取状态元素
+// 定义一个全局变量来存储配置
+let globalConfig = {};
 
-      if (backupgistcycle > 60000 && backupgist === true ) {
+// 函数用于从 localStorage 读取配置
+function loadConfig() {
+    // 从 localStorage 中获取 config 字符串
+    const configString = localStorage.getItem('config');
+
+
+
+    // 检查是否成功获取到配置
+    if (configString) {
+        try {
+            // 解析 JSON 字符串为对象
+            const configObject = JSON.parse(configString);
+
+            // 将配置对象赋值给全局变量
+            globalConfig = {
+                backupgist: configObject.gistSync || false,
+                backuptab : configObject.newTabExport || false,
+                backupmd: configObject.mdExport || false,
+                autoUpload: configObject.autoUpload || false,
+                backupgistcycle: configObject.uploadInterval || '',
+                gistUrl: configObject.gistUrl || '',
+                token: configObject.gistToken || '',
+            };
+
+            console.log('配置加载成功:', globalConfig);
+    document.getElementById('gist-sync').checked = globalConfig.backupgist;
+    document.getElementById('new-tab-export').checked = globalConfig.backuptab;
+    document.getElementById('md-export').checked = globalConfig.backupmd;
+    document.getElementById('auto-upload').checked = globalConfig.autoUpload;
+    document.getElementById('upload-interval').value = globalConfig.backupgistcycle;
+    document.getElementById('gist-url').value = globalConfig.gistUrl;
+    document.getElementById('gist-token').value = globalConfig.token;
+        } catch (error) {
+            console.error('解析配置时出错:', error);
+        }
+    } else {
+        console.warn('未找到配置项');
+    }
+}
+
+window.onload = function() {
+    loadConfig();
+    const statusElement = document.getElementById('upload-status'); // 获取状态元素
+    
+
+      if (globalConfig.backupgistcycle >= 5 && globalConfig.autoUpload === true ) {
+
         const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
-        statusElement.textContent = `${currentTime} 🔁已启用自动上传Gist（间隔 ${backupgistcycle/1000} 秒） `; // 设置初始状态
+        statusElement.textContent = `${currentTime} 🔁已启用自动上传Gist（间隔 ${globalConfig.backupgistcycle} 分钟，5s后开始第一次上传） `; // 设置初始状态
         setTimeout(() => {
-        backup();
+            backup2gist();
         }, 5000); // 10000毫秒 = 10秒
 
-        setInterval(backup, backupgistcycle);
+        setInterval(backup2gist, globalConfig.backupgistcycle*60000);
       } else {
         const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
-        statusElement.textContent = `${currentTime} ℹ未启用自动上传Gist，请注意手动备份`; // 设置初始状态
-        setTimeout(() => {
-        statusElement.textContent = ''; // 10秒后清空状态
-        }, 5000); // 10000毫秒 = 10秒
+        statusElement.textContent = `${currentTime} ℹ️未启用自动上传Gist，请定期手动备份（按 Ctrl + Shift + ? 配置备份方式）`; // 设置初始状态
+        //setTimeout(() => {
+        //statusElement.textContent = ''; // 10秒后清空状态
+        //}, 5000); // 10000毫秒 = 10秒
       }
+
     };
 
 
 
+//设置功能部分
 
+
+
+document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === '?') {
+            document.getElementById('config-modal').style.display = 'block';
+            document.getElementById('gist-options').style.display = globalConfig.backupgist ? 'block' : 'none';
+            document.getElementById('gist-options2').style.display = globalConfig.autoUpload ? 'block' : 'none';
+
+        }
+    });
+
+
+    // 根据选项的初始状态设置相应的显示状态
+
+
+    // Toggle gist options visibility
+    document.getElementById('gist-sync').addEventListener('change', function() {
+        document.getElementById('gist-options').style.display = this.checked ? 'block' : 'none';
+
+    });
+
+    document.getElementById('auto-upload').addEventListener('change', function() {
+        document.getElementById('gist-options2').style.display = this.checked ? 'block' : 'none';
+
+    });
+
+    // Save configuration to localStorage
+    document.getElementById('save-config').addEventListener('click', () => {
+        const config = {
+            gistSync: document.getElementById('gist-sync').checked,
+            newTabExport: document.getElementById('new-tab-export').checked,
+            mdExport: document.getElementById('md-export').checked,
+            autoUpload: document.getElementById('auto-upload').checked,
+            uploadInterval: parseInt(document.getElementById('upload-interval').value, 10) || null,
+            gistUrl: document.getElementById('gist-url').value || '',
+            gistToken: document.getElementById('gist-token').value || ''
+        };
+
+        // Save config to localStorage
+        localStorage.setItem('config', JSON.stringify(config));
+        
+        // Refresh the page
+        window.location.reload();
+    });
 
 
         

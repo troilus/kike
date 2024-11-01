@@ -27,8 +27,7 @@ https://troilus.github.io/kike/
 7. 点击日历视图可以看整个月已完成、未完成的任务
 8. 日历视图下，可以拖动改变任务日期
 9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务
-   1.  注意在301~303行修改导出方式
-   2.  如果要备份到gist，注意在299~300行修改gist地址和token
-   3.  ctrl+shift+. 可以从gist下载数据
+   1.  ctrl+shift+. 可以从gist下载数据
+   2.  按 Ctrl + Shift + ？ 进行配置
 10. ctrl+/ 可以显示使用说明
 11. ctrl+, 可以导入任务（格式必须同9导出的）
