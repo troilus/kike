@@ -34,7 +34,7 @@
         
         
         body {
-            font-family: Arial, sans-serif;
+            font-family: sans-serif;
                 max-width: 720px; /* 最大宽度 */
             margin: 25px auto;    /* 水平居中 */
             padding: 0 20px;   /* 内边距，防止内容紧贴边缘 */
@@ -154,6 +154,7 @@
         .todo-text {
             flex-grow: 1;
             color: #131315;
+            font-family: sans-serif;
         
         font-size: 16px;
         padding-top: 8px;
@@ -271,7 +272,7 @@
     background-color: #fff;
     /*box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);*/
     width: 600px;
-    height: 311px; /* 固定高度为600px */
+    height: 336px; /* 固定高度为600px */
     overflow: hidden; /* 防止内容溢出 */
 
 
@@ -289,7 +290,7 @@
 #save-config {
     position: absolute; /* 绝对定位 */
     bottom: 10px; /* 距离底部10px */
-    left: 50%; /* 水平居中 */
+    left: 40%; /* 水平居中 */
     transform: translateX(-50%); /* 通过平移来实现居中 */
 
     padding: 10px 20px;
@@ -309,6 +310,28 @@
 }
 
 
+
+#exitconfig {
+    position: absolute; /* 绝对定位 */
+    bottom: 10px; /* 距离底部10px */
+    left: 60%; /* 水平居中 */
+    transform: translateX(-50%); /* 通过平移来实现居中 */
+
+    padding: 10px 20px;
+    background-color: #FF4351;
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 2px; /* 圆角效果 */
+    box-shadow: 0 0 0 2px black; /* 模拟 outline */
+}
+
+#exitconfig:hover {
+    background-color: #ff7680;
+    
+}
 
         
     </style>
@@ -354,6 +377,7 @@
     
             <!-- Save and exit button -->
             <button id="save-config">保存并退出</button>
+            <button id="exitconfig">退出</button>
         </div>
     
     <!-- 日期导航部分 -->
@@ -1451,6 +1475,10 @@ document.addEventListener('keydown', (e) => {
         
         // Refresh the page
         window.location.reload();
+    });
+
+    document.getElementById('exitconfig').addEventListener('click', () => {
+        document.getElementById('config-modal').style.display = 'none';
     });
 
 
