@@ -1412,7 +1412,7 @@ window.onload = function() {
     const statusElement = document.getElementById('upload-status'); // 获取状态元素
     
 
-      if (globalConfig.backupgistcycle >= 5 && globalConfig.autoUpload === true ) {
+      if (globalConfig.backupgistcycle >= 5 && globalConfig.autoUpload === true  && globalConfig.backupgist === true) {
 
         const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
         statusElement.textContent = `${currentTime} 🔁已启用自动上传Gist（间隔 ${globalConfig.backupgistcycle} 分钟，5s后开始第一次上传） `; // 设置初始状态
