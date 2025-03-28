@@ -59,6 +59,7 @@
     font-weight: bold;
     font-size: 12px;
     align-self: baseline;
+    cursor: pointer; /* 确保鼠标指针变为手型 */
 }
 
 .date-line {
@@ -422,7 +423,7 @@
     </div>
     <button id="chooseDateBtn" style="display: none;">选择日期</button>
     <input type="date" id="datePicker" style="display: none;">
-    <button id="addTodo">➕</button>
+    <button id="addTodo" title="新增任务">➕</button>
     <button id="calendarViewBtn">📅日历视图</button>
     <div id="upload-status" class="status"></div>
 
@@ -529,11 +530,22 @@
         
                 // 生成7天的日期显示 (始终以周一为开始)
                 function updateDays() {
-    daysContainer.innerHTML = '';
+                    daysContainer.innerHTML = '';
 
-        // 设置年份显示
-        const yearDisplay = document.getElementById("yearDisplay");
-    yearDisplay.textContent = "🧭"+currentDate.getFullYear(); // 获取当前显示年份并更新
+        // 设置左上角年份显示
+                const yearDisplay = document.getElementById("yearDisplay");
+            yearDisplay.textContent = "🧭"+currentDate.getFullYear(); // 获取当前显示年份并更新
+                yearDisplay.title = "转到今天"; // 添加鼠标悬停提示
+            yearDisplay.style.cursor = "pointer"; // 设置鼠标指针样式
+
+                // 添加点击事件跳转到今天
+    yearDisplay.addEventListener('click', () => {
+        currentDate = new Date(); // 重置为今天
+        currentSelectedDate = formatDate(currentDate);
+        updateDays();
+        renderTodoList();
+    });
+
     
     const dayOfWeek = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
     let tempDate = new Date(currentDate);
