@@ -32,6 +32,27 @@
     padding-top: 10px;
 
 }
+
+
+#settingsBtn {
+    width: 10%;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #fec04e;
+    border-radius: 2px;
+    box-shadow: 0 0 0 2px black;
+    color: black;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+    font-family: sans-serif;
+}
+
+#settingsBtn:hover {
+    background-color: #ffda97;
+}
+
         
         
         body {
@@ -274,7 +295,7 @@
     background-color: #fff;
     /*box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);*/
     width: 600px;
-    height: 336px; /* 固定高度为600px */
+    height: 363px; /* 固定高度为600px */
     overflow: hidden; /* 防止内容溢出 */
 
 
@@ -289,23 +310,7 @@
     margin-left: 20px; /* 缩进20px */
 }
 
-#save-config {
-    position: absolute; /* 绝对定位 */
-    bottom: 6px; /* 距离底部10px */
-    left: 40%; /* 水平居中 */
-    transform: translateX(-50%); /* 通过平移来实现居中 */
 
-    padding: 10px 20px;
-    background-color: #A5DE37;
-    color: rgb(0, 0, 0);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 2px; /* 圆角效果 */
-    box-shadow: 0 0 0 2px black; /* 模拟 outline */
-    font-family: sans-serif;
-}
 
 #save-config:hover {
     background-color: #b9e563;
@@ -314,29 +319,59 @@
 
 
 
-#exitconfig {
-    position: absolute; /* 绝对定位 */
-    bottom: 6px; /* 距离底部10px */
-    left: 60%; /* 水平居中 */
-    transform: translateX(-50%); /* 通过平移来实现居中 */
 
+
+
+
+.modal-buttons-container {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+#helpBtn, #save-config, #exitconfig {
+    position: static; /* 移除绝对定位 */
+    transform: none;  /* 移除transform */
+    /* 保留其他样式 */
     padding: 10px 20px;
-    background-color: #FF4351;
-    color: rgb(0, 0, 0);
-    border: none;
-    border-radius: 5px;
+    border-radius: 2px;
+    box-shadow: 0 0 0 2px black;
     cursor: pointer;
     font-size: 16px;
-    border-radius: 2px; /* 圆角效果 */
-    box-shadow: 0 0 0 2px black; /* 模拟 outline */
     font-family: sans-serif;
+    border: none;
+}
+
+#helpBtn {
+    background-color: #088ef0;
+    color: white;
+}
+
+#helpBtn:hover {
+    background-color: #34a5f8;
+}
+
+#save-config {
+    background-color: #A5DE37;
+    color: black;
+}
+
+#save-config:hover {
+    background-color: #b9e563;
+}
+
+#exitconfig {
+    background-color: #FF4351;
+    color: white;
 }
 
 #exitconfig:hover {
     background-color: #ff7680;
-    
 }
-
         
     </style>
 </head>
@@ -380,8 +415,11 @@
     
     
             <!-- Save and exit button -->
-            <button id="save-config">保存并退出</button>
-            <button id="exitconfig">退出</button>
+    <div class="modal-buttons-container">
+        <button id="helpBtn">ℹ️帮助</button>
+        <button id="save-config">💾保存并退出</button>
+        <button id="exitconfig">退出</button>
+    </div>
         </div>
     
     <!-- 日期导航部分 -->
@@ -424,7 +462,10 @@
     <button id="chooseDateBtn" style="display: none;">选择日期</button>
     <input type="date" id="datePicker" style="display: none;">
     <button id="addTodo" title="新增任务">➕</button>
+<div style="display: flex; gap: 10px;">
     <button id="calendarViewBtn">📅日历视图</button>
+    <button id="settingsBtn" title="设置">⚙️</button>
+</div>
     <div id="upload-status" class="status"></div>
 
 
@@ -970,6 +1011,46 @@ const selectedDateObj = new Date(newDate);
         const calendarViewBtn = document.getElementById("calendarViewBtn");
         const calendarBody = document.getElementById("calendarBody");
         const viewLabel = document.getElementById("viewLabel");
+
+
+
+
+        // 设置按钮
+document.getElementById("settingsBtn").addEventListener("click", () => {
+    document.getElementById("config-modal").style.display = "block";
+    document.getElementById("gist-options").style.display = globalConfig.backupgist ? "block" : "none";
+    document.getElementById("gist-options2").style.display = globalConfig.autoUpload ? "block" : "none";
+});
+
+
+
+// 帮助功能
+document.getElementById("helpBtn").addEventListener("click", function() {
+    const helpTab = window.open();
+    helpTab.document.write(`
+        <html>
+            <head>
+                <title>使用说明</title>
+            </head>
+            <body>
+                <h1>使用说明</h1>
+                <p>1. 点击日期可以切换日期，点击<>可以切换上一周、下一周</p>
+                <p>2. 点击+新增待办</p>
+                <p>3. 点击编辑按钮修改待办内容</p>
+                <p>4. 点击选择日期，可以将任务移动到其他日期</p>
+                <p>5. 可以拖动任务到其他日期</p>
+                <p>6. 前期未完成的任务会自动转移到今天，已完成的不会转移</p>
+                <p>7. 点击日历视图可以看整个月已完成、未完成的任务</p>
+                <p>8. 日历视图下，可以拖动改变任务日期</p>
+                <p>9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务</p>
+                <p>10. ctrl+/ 可以显示说明 </p>
+                <p>11. ctrl+, 可以导入任务（格式必须同9导出的） </p>
+            </body>
+        </html>
+    `);
+    helpTab.document.close();
+});
+
         
         calendarViewBtn.addEventListener('click', toggleCalendarView);
         document.getElementById("prevMonth").addEventListener('click', () => changeMonth(-1));
@@ -984,8 +1065,10 @@ const selectedDateObj = new Date(newDate);
                 calendarViewBtn.textContent = isCalendarView ? '🕔️周视图' : '📅日历视图';
         const addTodoButton = document.getElementById("addTodo");
             addTodoButton.style.display = isCalendarView ? 'none' : 'block';
-        
-        
+            // 控制设置按钮的显示/隐藏
+    document.getElementById("settingsBtn").style.display = isCalendarView ? 'none' : 'block';
+
+
             if (isCalendarView) {
                 renderCalendar();
             }
