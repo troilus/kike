@@ -1626,17 +1626,24 @@ window.onload = function() {
         setInterval(backup2gist, globalConfig.backupgistcycle*60000);
     }
     
-    // 设置JSON本地备份
-    if (hasJsonBackup) {
-        const currentTime = new Date().toLocaleTimeString();
+    // 检查并设置本地备份（JSON和MD）
+    const currentTime = new Date().toLocaleTimeString();
+    if (hasJsonBackup && hasMdBackup) {
+        // 同时启用JSON和MD备份
+        statusElement.textContent = `${currentTime} 💾 已启用JSON、MD自动下载(间隔 ${globalConfig.localBackupInterval}/${globalConfig.localBackupIntervalmd} 分钟)`;
+        setTimeout(() => {
+            backupToLocal();
+            backupToLocalmd();
+        }, 5000);
+        setInterval(backupToLocal, globalConfig.localBackupInterval * 60000);
+        setInterval(backupToLocalmd, globalConfig.localBackupIntervalmd * 60000);
+    } else if (hasJsonBackup) {
+        // 只启用JSON备份
         statusElement.textContent = `${currentTime} 💾 已启用JSON自动下载(间隔 ${globalConfig.localBackupInterval} 分钟)`;
         setTimeout(backupToLocal, 5000);
         setInterval(backupToLocal, globalConfig.localBackupInterval * 60000);
-    }
-    
-    // 设置MD本地备份
-    if (hasMdBackup) {
-        const currentTime = new Date().toLocaleTimeString();
+    } else if (hasMdBackup) {
+        // 只启用MD备份
         statusElement.textContent = `${currentTime} 💾 已启用MD自动下载(间隔 ${globalConfig.localBackupIntervalmd} 分钟)`;
         setTimeout(backupToLocalmd, 5000);
         setInterval(backupToLocalmd, globalConfig.localBackupIntervalmd * 60000);
@@ -1644,8 +1651,7 @@ window.onload = function() {
     
     // 如果所有备份功能都未启用，则显示提示
     if (!hasGistBackup && !hasJsonBackup && !hasMdBackup) {
-        const currentTime = new Date().toLocaleTimeString();
-        statusElement.textContent = `${currentTime} ℹ️未启用自动下载、自动上传Gist，请定期手动备份(按 Ctrl + Shift + ? 配置备份方式)`;
+        statusElement.textContent = `${currentTime} ℹ️未启用自动上传Gist、下载MD/JSON，请定期手动备份(按 Ctrl + Shift + ? 配置备份方式)`;
     }
 };
 
