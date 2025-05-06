@@ -1542,7 +1542,14 @@ function backupToLocal() {
 
     const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
     const output = JSON.stringify(todosByDate, null, 2);
-    const currentTime = new Date().toLocaleTimeString();
+const currentTime = new Date().toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+});
 
     const fileName = `todos_backup_${currentTime}.json`;
 
@@ -1587,7 +1594,14 @@ function backupToLocalmd() {
             output += '\n'; // 添加空行以分隔日期
         }
 
-    const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+const currentTime = new Date().toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+});
     const fileName = `todos_backup_${currentTime}.md`;
 
     // 创建下载链接
