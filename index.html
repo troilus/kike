@@ -1542,8 +1542,9 @@ function backupToLocal() {
 
     const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
     const output = JSON.stringify(todosByDate, null, 2);
-    const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
-    const fileName = `todos_backup_UTC_${now}.json`;
+    const currentTime = new Date().toLocaleTimeString();
+
+    const fileName = `todos_backup_${currentTime}.json`;
 
     // 创建下载链接
     const blob = new Blob([output], { type: 'application/json' });
@@ -1558,7 +1559,6 @@ function backupToLocal() {
 
     // 更新状态
     const statusElement = document.getElementById('upload-status');
-    const currentTime = new Date().toLocaleTimeString();
     statusElement.textContent = `${currentTime} 💾 本地备份()已创建: ${fileName}`;
 }
 
@@ -1587,8 +1587,8 @@ function backupToLocalmd() {
             output += '\n'; // 添加空行以分隔日期
         }
 
-    const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
-    const fileName = `todos_backup_UTC_${now}.md`;
+    const currentTime = new Date().toLocaleTimeString(); // 获取当前时间
+    const fileName = `todos_backup_${currentTime}.md`;
 
     // 创建下载链接
     const blob = new Blob([output], { type: 'text/markdown' });
@@ -1603,7 +1603,6 @@ function backupToLocalmd() {
 
     // 更新状态
     const statusElement = document.getElementById('upload-status');
-    const currentTime = new Date().toLocaleTimeString();
     statusElement.textContent = `${currentTime} 💾 本地备份(MD)已创建: ${fileName}`;
 }
 
