@@ -1,473 +1,1016 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22  font-size=%2290%22>🐠</text></svg>">
-    <meta charset="UTF-8">
+<!-- saved from url=(0035)http://10.106.1.75/assets/todo.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%220.9em%22  font-size=%2290%22&gt;%F0%9F%90%A0&lt;/text&gt;&lt;/svg&gt;">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>✔我的待办</title>
     <style>
-        #calendarViewBtn {
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px 15px;
-            background-color: #FF4351;
-            border-radius: 2px; /* 圆角效果 */
-            box-shadow: 0 0 0 2px black; /* 模拟 outline */
-            color: white;
-            border: none;
-            cursor: pointer;
-            text-align: center;
-            font-size: 16px;
-            font-family: sans-serif;
+        :root {
+            --bg-primary: #f5f0eb;
+            --bg-card: #ffffff;
+            --text-primary: #1c1917;
+            --text-secondary: #78716c;
+            --text-muted: #a8a29e;
+            --accent: #d97706;
+            --accent-hover: #b45309;
+            --accent-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --completed-text: #a8a29e;
+            --border: #e7e5e4;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
         }
-        
-        #calendarViewBtn:hover {
-            background-color: #ff7680; /* 和 + 按钮一样的悬停效果 */
+
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
-        
-        .status {
 
-    font-size: 14px;
-    text-align: right;
-    padding-top: 10px;
-
-}
-
-
-#settingsBtn {
-    width: 10%;
-    margin-top: 10px;
-    padding: 10px 15px;
-    background-color: #fec04e;
-    border-radius: 2px;
-    box-shadow: 0 0 0 2px black;
-    color: black;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-    font-size: 16px;
-    font-family: sans-serif;
-}
-
-#settingsBtn:hover {
-    background-color: #ffda97;
-}
-
-        
-        
         body {
-            font-family: sans-serif;
-                max-width: 720px; /* 最大宽度 */
-            margin: 25px auto;    /* 水平居中 */
-            padding: 0 20px;   /* 内边距，防止内容紧贴边缘 */
+            font-family: var(--font);
+            background: var(--bg-primary);
+            max-width: 720px;
+            margin: 32px auto;
+            padding: 0 20px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            transition: max-width 0.3s ease;
         }
-        
-        
-        
+        body.calendar-mode {
+            max-width: 960px;
+        }
+
+        /* ===== Date Nav ===== */
         .date-nav {
-            border-radius: 2px; /* 圆角效果 */
-            box-shadow: 0 0 0 2px black; /* 模拟 outline */
-    display: flex;
-    flex-direction: column; /* 垂直排列年份和日期导航 */
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #fec04e;
-    color: #221f1f;
-}
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 14px 16px;
+        }
 
-.year-line {
-    font-weight: bold;
-    font-size: 12px;
-    align-self: baseline;
-    cursor: pointer; /* 确保鼠标指针变为手型 */
-}
+        .year-line {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            align-self: flex-start;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s, color 0.15s;
+            margin-bottom: 4px;
+        }
+        .year-line:hover {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
 
-.date-line {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%; /* 使箭头和日期导航居中分布 */
-}
+        .date-line {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 4px;
+        }
 
-.arrow {
-    cursor: pointer;
-    font-size: 20px;
-    padding: 0 10px;
-}
+        .arrow {
+            cursor: pointer;
+            font-size: 18px;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            user-select: none;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        .arrow:hover {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
 
-.days {
-    display: flex;
-            justify-content: space-between;
-            flex-grow: 1;
-            margin: 0 10px;
-}
+        .days {
+            display: flex;
+            flex: 1;
+            gap: 4px;
+        }
+
         .day {
             position: relative;
             flex: 1;
             text-align: center;
-            padding: 10px;
+            padding: 8px 4px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            border-radius: var(--radius-md);
+            transition: background 0.2s, color 0.2s;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.4;
         }
-                .todo-item:hover .todo-buttons, .todo-item.editing .todo-buttons {
-            display: inline-block;
-        }
-        .todo-buttons {
-            display: none;
-        }
-        
         .day:hover {
-            background-color: #ffda97;
-            border-radius: 6px;
-                                    color: #221f1f;
+            background: var(--accent-light);
+            color: var(--text-primary);
         }
-        .active {
-            background-color: #ffda97;
-            font-weight: bold;
-            border-radius: 6px;
-                                    color: #221f1f;
-        
+        .day.active {
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
         }
-        .today {
-            font-weight: bold;
+        .day.active:hover {
+            background: var(--accent-hover);
+            color: #fff;
         }
+        .day.today {
+            font-weight: 600;
+        }
+        .day.today:not(.active) {
+            color: var(--accent);
+        }
+
         .badge {
             position: absolute;
-            top: 5px;
-            right: 10px;
-            background-color: #FF4351;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 12px;
+            top: 2px;
+            right: 6px;
+            background: var(--danger);
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            font-size: 11px;
+            line-height: 16px;
+            text-align: center;
+            font-weight: 600;
         }
+
+
+        /* ===== Todo Container ===== */
         .todo-container {
-            margin-top: 20px;
-        
-            padding-right: 20px;
-        
-            padding-left: 20px;
-            background-color: #f9f9f9;
-            border-radius: 2px; /* 圆角效果 */
-            box-shadow: 0 0 0 2px black; /* 模拟 outline */
+            margin-top: 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: hidden;
         }
-        /* 新增样式以调整日期选择器的位置 */
-        .date-picker-container {
-            display: flex;
-            align-items: center;
-            margin-left: 10px; /* 调整间距 */
-        }
-        #datePicker {
-            display: none; /* 初始隐藏 */
-          /* margin-right: 10px;  按钮与日期选择器之间的间距 */
-        }
+
         .todo-item {
             display: flex;
             align-items: center;
-            border-bottom: 1px solid #ccc;
-            justify-content: space-between;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+            gap: 10px;
         }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        .todo-item:hover {
+            background: #fafaf9;
+        }
+        .todo-item.editing {
+            background: var(--accent-light);
+        }
+
         .todo-checkbox {
             width: 20px;
             height: 20px;
             cursor: pointer;
-            margin-right: 10px;
+            accent-color: var(--accent);
+            flex-shrink: 0;
+            border-radius: 4px;
         }
+
         .todo-text {
-            flex-grow: 1;
-            color: #131315;
-            font-family: sans-serif;
-        
-        font-size: 16px;
-        padding-top: 8px;
-            padding-right: 15px;
-            padding-bottom: 8px;
-            padding-left: 1px;
-            margin-right: 10px;
+            flex: 1;
+            font-size: 15px;
+            color: var(--text-primary);
+            padding: 6px 0;
             border: none;
             outline: none;
-            background-color: #fff;
+            background: transparent;
+            font-family: var(--font);
+            min-width: 0;
         }
         .todo-text[disabled] {
-            background-color: #f9f9f9;
+            background: transparent;
+            cursor: default;
         }
-        .completed {
+        .todo-text.completed {
             text-decoration: line-through;
-            color: #888;
+            color: var(--completed-text);
         }
-        
-        .todo-buttons .delete-confirm {
-            background-color: #FF4351 ;
-            color: white;
-            border-color: #FF4351;
-            border: none;
-            background: #FF4351;
+
+        .todo-buttons {
+            display: none;
+            flex-shrink: 0;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
         }
-        
-        
+        .todo-item:hover .todo-buttons,
+        .todo-item.editing .todo-buttons {
+            display: flex;
+        }
+
         .todo-buttons button {
-            animation-name: glowing-primary;
-            border-color: #088ef0;
-            background: linear-gradient(#34a5f8, #088ef0);
-            color: #FFF;
-            margin: 2.5px;
-            border-style: solid;
-            border-width: 1px;
-            line-height: 25px;
-            border-radius: 4px;
-            text-align: center;
+            font-family: var(--font);
+            font-size: 13px;
+            padding: 4px 12px;
             border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.15s, opacity 0.15s;
+            line-height: 1.6;
         }
-        
-        .calendar-day.today {
-            background-color: #fffeaa; /* 今日的背景 */
-            color: black; /* 反色显示 */
-            font-size: 12px;
-            white-space: nowrap;
+
+        .todo-buttons button:not(.delete-confirm) {
+            background: #f5f5f4;
+            color: var(--text-primary);
         }
+        .todo-buttons button:not(.delete-confirm):hover {
+            background: #e7e5e4;
+        }
+
+        .todo-buttons .delete-confirm {
+            background: var(--danger);
+            color: #fff;
+        }
+        .todo-buttons .delete-confirm:hover {
+            background: var(--danger-hover);
+        }
+
+        .date-picker-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        #datePicker {
+            display: none;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 2px 4px;
+            font-family: var(--font);
+            font-size: 13px;
+        }
+
+        /* ===== Calendar View ===== */
+        #calendarView {
+            margin-top: 16px;
+        }
+
         .calendar-nav {
             display: flex;
-            justify-content: center; /* 中心对齐 */
+            justify-content: center;
             align-items: center;
-            padding: 28px; /* 添加内边距 */
-            background-color: #fec04e;
-            border-radius: 2px; /* 圆角效果 */
-            box-shadow: 0 0 0 2px black; /* 模拟 outline */
-            color: #221f1f;
-            font-weight: bold;
+            gap: 24px;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 12px;
         }
-        
+
         .calendar-header {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             text-align: center;
-            font-weight: bold;
-            padding-top: 28px;
-            padding-bottom: 28px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 12px 0;
         }
-        
+
         .calendar-body {
             display: grid;
-            grid-template-columns: repeat(7, 1fr); /* 七列 */
-            grid-template-rows: repeat(autofill, 1fr); /* 行自适应 */
-            height: auto; 
-        
-            gap: 10px; /* 可选，设置格子之间的间距 */
-        
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
         }
-        
+
         .calendar-day {
-            border: 1px solid #ddd;
-            padding: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px;
+            min-height: 80px;
+            font-size: 12px;
             position: relative;
-        font-size: 12px;
-            white-space: nowrap;         /* 禁用换行 */
-            overflow: hidden;           /* 隐藏溢出的内容 */
+            overflow: hidden;
+            transition: box-shadow 0.15s, border-color 0.15s;
         }
+        .calendar-day:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-sm);
+        }
+        .calendar-day.today {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+        .calendar-day > div {
+            font-size: 11px;
+            line-height: 1.3;
+            color: var(--text-secondary);
+            padding: 1px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .calendar-day > div.completed {
+            color: var(--completed-text);
+            text-decoration: line-through;
+        }
+
+        /* ===== Buttons ===== */
         #addTodo {
             width: 100%;
-            margin-top: 10px;
-            border-radius: 2px; /* 圆角效果 */
-            box-shadow: 0 0 0 2px black; /* 模拟 outline */
-            padding: 10px 15px;
-            background-color: #A5DE37;
-            color: black;
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: var(--accent);
+            color: #fff;
             border: none;
+            border-radius: var(--radius-md);
             cursor: pointer;
-            text-align: center;
-            font-size: 16px;
+            font-size: 15px;
+            font-family: var(--font);
+            font-weight: 500;
+            transition: background 0.15s, transform 0.1s;
+            box-shadow: var(--shadow-sm);
         }
         #addTodo:hover {
-            background-color: #b9e563
+            background: var(--accent-hover);
+        }
+        #addTodo:active {
+            transform: scale(0.98);
         }
 
+        .bottom-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .bottom-actions button {
+            flex: 1;
+            padding: 10px 12px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 14px;
+            font-family: var(--font);
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+        .bottom-actions button:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
-#config-modal {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 20px;
-    border-radius: 2px;
-    box-shadow: 0 0 0 2px black;
-    background-color: #fff;
-    width: 600px;
-    /* 移除固定高度和overflow */
-    max-height: 80vh; /* 设置最大高度为视口的80% */
-    overflow-y: auto; /* 内容过多时显示滚动条 */
-}
+        /* ===== Status ===== */
+        .status {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: right;
+            padding-top: 8px;
+            line-height: 1.4;
+        }
 
-#config-modal label {
-    display: block;
-    margin-top: 10px;
-}
+        /* ===== Settings Modal ===== */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            animation: fadeIn 0.2s ease;
+        }
+        #modal-overlay.show {
+            display: block;
+        }
 
-#config-modal .indented-section {
-    margin-left: 20px; /* 缩进20px */
-}
+        #config-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 580px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            padding: 0;
+            animation: modalIn 0.2s ease forwards;
+        }
+        #config-modal.show {
+            display: block;
+        }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
 
+        #config-modal .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 0;
+        }
+        #config-modal .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        #config-modal .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s, color 0.15s;
+            line-height: 1;
+        }
+        #config-modal .modal-close:hover {
+            background: #f5f5f4;
+            color: var(--text-primary);
+        }
 
-#save-config:hover {
-    background-color: #b9e563;
-    
-}
+        #config-modal .modal-body {
+            padding: 16px 24px 20px;
+        }
 
+        #config-modal .settings-section {
+            margin-bottom: 20px;
+        }
+        #config-modal .settings-section:last-child {
+            margin-bottom: 0;
+        }
+        #config-modal .settings-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
 
+        #config-modal .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            gap: 12px;
+        }
+        #config-modal .setting-row .setting-label {
+            font-size: 14px;
+            color: var(--text-primary);
+            flex: 1;
+        }
 
+        /* Custom Toggle Switch */
+        .toggle-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+        .toggle-wrap input {
+            display: none;
+        }
+        .toggle-track {
+            display: block;
+            width: 40px;
+            height: 24px;
+            background: #d6d3d1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .toggle-wrap input:checked + .toggle-track {
+            background: var(--accent);
+        }
+        .toggle-wrap input:checked + .toggle-track::after {
+            transform: translateX(16px);
+        }
 
+        #config-modal .setting-input {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            font-size: 13px;
+            font-family: var(--font);
+            color: var(--text-primary);
+            background: #fafaf9;
+            outline: none;
+            transition: border-color 0.15s;
+            width: 60px;
+        }
+        #config-modal .setting-input:focus {
+            border-color: var(--accent);
+            background: #fff;
+        }
+        #config-modal .setting-input-text {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            font-size: 13px;
+            font-family: var(--font);
+            color: var(--text-primary);
+            background: #fafaf9;
+            outline: none;
+            transition: border-color 0.15s;
+            width: 260px;
+        }
+        #config-modal .setting-input-text:focus {
+            border-color: var(--accent);
+            background: #fff;
+        }
 
+        #config-modal .indented-section {
+            padding-left: 24px;
+            border-left: 2px solid var(--border);
+            margin-top: 4px;
+            margin-bottom: 4px;
+        }
+        #config-modal .indented-section .setting-row {
+            padding: 4px 0;
+        }
 
+        #config-modal .settings-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
 
-.modal-buttons-container {
-    position: sticky; /* 改为sticky定位 */
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    background-color: #fff; /* 添加背景色避免内容穿透 */
-    padding: 10px 0;
-    margin-top: 20px; /* 添加与内容的间距 */
-}
+        #config-modal .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            background: #fafaf9;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+        #config-modal .modal-footer button {
+            font-family: var(--font);
+            font-size: 14px;
+            padding: 8px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.15s, opacity 0.15s;
+            font-weight: 500;
+        }
+        #config-modal .modal-footer .btn-secondary {
+            background: #f5f5f4;
+            color: var(--text-primary);
+        }
+        #config-modal .modal-footer .btn-secondary:hover {
+            background: #e7e5e4;
+        }
+        #config-modal .modal-footer .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        #config-modal .modal-footer .btn-primary:hover {
+            background: var(--accent-hover);
+        }
 
-#helpBtn, #save-config, #exitconfig {
-    position: static; /* 移除绝对定位 */
-    transform: none;  /* 移除transform */
-    /* 保留其他样式 */
-    padding: 10px 20px;
-    border-radius: 2px;
-    box-shadow: 0 0 0 2px black;
-    cursor: pointer;
-    font-size: 16px;
-    font-family: sans-serif;
-    border: none;
-}
+        /* ===== Help Modal ===== */
+        #help-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            z-index: 999; animation: fadeIn 0.2s ease;
+        }
+        #help-modal-overlay.show { display: block; }
 
-#helpBtn {
-    background-color: #088ef0;
-    color: white;
-}
+        #help-modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 520px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            padding: 0;
+            animation: modalIn 0.2s ease forwards;
+        }
+        #help-modal.show { display: block; }
 
-#helpBtn:hover {
-    background-color: #34a5f8;
-}
+        #help-modal .help-section {
+            margin-bottom: 18px;
+        }
+        #help-modal .help-section:last-child { margin-bottom: 0; }
+        #help-modal .help-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+        #help-modal .help-item {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 4px 0 4px 8px;
+            line-height: 1.6;
+        }
+        #help-modal .help-key {
+            display: inline-block;
+            background: #f5f5f4;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1px 7px;
+            font-size: 12px;
+            font-family: var(--font);
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+        #help-modal .help-badge {
+            display: inline-block;
+            background: var(--danger);
+            color: #fff;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            line-height: 18px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 0 5px;
+        }
 
-#save-config {
-    background-color: #A5DE37;
-    color: black;
-}
+        #help-modal .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 0;
+        }
+        #help-modal .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        #help-modal .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s, color 0.15s;
+            line-height: 1;
+        }
+        #help-modal .modal-close:hover {
+            background: #f5f5f4;
+            color: var(--text-primary);
+        }
+        #help-modal .modal-body {
+            padding: 16px 24px 20px;
+        }
+        #help-modal .modal-footer {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            background: #fafaf9;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+        #help-modal .modal-footer button {
+            font-family: var(--font);
+            font-size: 14px;
+            padding: 8px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.15s;
+            font-weight: 500;
+        }
+        #help-modal .modal-footer .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        #help-modal .modal-footer .btn-primary:hover {
+            background: var(--accent-hover);
+        }
 
-#save-config:hover {
-    background-color: #b9e563;
-}
+        /* ===== File Storage Section ===== */
+        #file-storage-section {
+            border-top: 1px solid var(--border);
+            margin-top: 12px;
+            padding-top: 12px;
+        }
+        #file-storage-section .file-storage-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        #file-status {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        #file-hint {
+            font-size: 12px;
+            color: var(--danger);
+        }
+        #pick-folder-btn, #disconnect-folder-btn {
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 4px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        #pick-folder-btn:hover, #disconnect-folder-btn:hover {
+            background: #f5f5f4;
+        }
 
-#exitconfig {
-    background-color: #FF4351;
-    color: white;
-}
+        /* ===== Scrollbar ===== */
+        #config-modal::-webkit-scrollbar {
+            width: 6px;
+        }
+        #config-modal::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #config-modal::-webkit-scrollbar-thumb {
+            background: #d6d3d1;
+            border-radius: 3px;
+        }
+        #config-modal::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e;
+        }
 
-#exitconfig:hover {
-    background-color: #ff7680;
-}
-        
+        /* ===== Responsive ===== */
+        @media (max-width: 600px) {
+            body {
+                margin: 16px auto;
+                padding: 0 12px;
+            }
+            #config-modal {
+                width: calc(100% - 24px);
+                max-height: 90vh;
+            }
+            #config-modal .modal-body {
+                padding: 12px 16px 16px;
+            }
+            #config-modal .modal-header,
+            #config-modal .modal-footer {
+                padding: 12px 16px;
+            }
+            .calendar-day {
+                min-height: 60px;
+                padding: 4px;
+                font-size: 11px;
+            }
+            .day {
+                font-size: 12px;
+                padding: 6px 2px;
+            }
+            .bottom-actions button {
+                font-size: 13px;
+                padding: 8px 6px;
+            }
+            #config-modal .setting-input-text {
+                width: 160px;
+            }
+        }
     </style>
 </head>
 <body>
+        <!-- Modal Overlay -->
+        <div id="modal-overlay"></div>
+
         <!-- 设置部分 -->
-        <div id="config-modal">
-            <!-- Main options -->
-            <label>ℹ️ Ctrl + / 显示帮助信息</label>
-            <label><input type="checkbox" id="md-export"> 启用md文件导出(快捷键 Ctrl + . 下载md文件)</label>
-            <label><input type="checkbox" id="local-backup"> 启用本地定时备份(JSON)</label>
-                        <div id="local-backup-options" style="display: none;">
-                            <div class="indented-section">
-                                <label>
-                                    备份间隔(分钟):
-                                    <input type="number" style="height: auto;width: 50px;" id="local-backup-interval" min="1" placeholder=">=1">
-                                </label>
+        <!-- Help Modal Overlay -->
+    <div id="help-modal-overlay"></div>
+
+    <!-- Help Modal -->
+    <div id="help-modal">
+        <div class="modal-header">
+            <h2>📖 使用说明</h2>
+            <button class="modal-close" id="help-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="help-section">
+                <div class="help-section-title">📆 基本操作</div>
+                <div class="help-item"><span class="help-key">点击日期</span>切换查看，按 <span class="help-key">◀ ▶</span> 切换上一周/下一周</div>
+                <div class="help-item">点击 <span class="help-key">➕ 新增任务</span> 创建待办</div>
+                <div class="help-item">点击复选框标记完成/未完成</div>
+                <div class="help-item">双击待办文本进入编辑，按 <span class="help-key">Enter</span> 保存</div>
+                <div class="help-item">长按拖拽任务到其他日期</div>
+                <div class="help-item">过去的未完成任务会自动转移到今天</div>
+            </div>
+            <div class="help-section">
+                <div class="help-section-title">📅 日历视图</div>
+                <div class="help-item">点击 <span class="help-key">📅 日历视图</span> 切换月视图，自动加宽页面</div>
+                <div class="help-item">点击日期格选中该日</div>
+                <div class="help-item">双击任务切换完成状态</div>
+                <div class="help-item">拖拽任务到其他日期格</div>
+                <div class="help-item">日期格右上角 <span class="help-badge">N</span> 显示未完成任务数</div>
+            </div>
+            <div class="help-section">
+                <div class="help-section-title">💾 数据管理</div>
+                <div class="help-item"><span class="help-key">Ctrl + .</span> 导出 MD/JSON / 上传 Gist（需在设置中启用）</div>
+                <div class="help-item"><span class="help-key">Ctrl + ,</span> 导入任务（MD 格式）</div>
+                <div class="help-item"><span class="help-key">Ctrl + Shift + ?</span> 打开设置</div>
+                <div class="help-item"><span class="help-key">Ctrl + /</span> 显示本帮助</div>
+                <div class="help-item">在设置中可开启自动备份（本地 JSON/MD 或 Gist 云同步）</div>
+                <div class="help-item">状态栏显示当前备份状态</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary" id="help-close-btn">我知道了</button>
+        </div>
+    </div>
+
+    <div id="config-modal">
+            <div class="modal-header">
+                <h2>⚙️ 设置</h2>
+                <button class="modal-close" id="exitconfig">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- 导出与快捷键 -->
+                <div class="settings-section">
+                    <div class="settings-section-title">📤 导出与快捷键</div>
+                    <div class="setting-row">
+                        <span class="setting-label">ℹ️ Ctrl + / 显示帮助信息</span>
+                    </div>
+                    <div class="setting-row">
+                        <span class="setting-label">MD 文件导出 (Ctrl + .)</span>
+                        <div class="toggle-wrap">
+                            <input type="checkbox" id="md-export">
+                            <label class="toggle-track" for="md-export"></label>
+                        </div>
+                    </div>
+                    <div class="setting-row">
+                        <span class="setting-label">JSON 文件导出 (Ctrl + .)</span>
+                        <div class="toggle-wrap">
+                            <input type="checkbox" id="json-export">
+                            <label class="toggle-track" for="json-export"></label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 本地备份 -->
+                <div class="settings-section">
+                    <div class="settings-section-title">💾 本地定时备份</div>
+                    <div class="setting-row">
+                        <span class="setting-label">JSON 格式备份</span>
+                        <div class="toggle-wrap">
+                            <input type="checkbox" id="local-backup">
+                            <label class="toggle-track" for="local-backup"></label>
+                        </div>
+                    </div>
+                    <div id="local-backup-options" style="display: none;">
+                        <div class="indented-section">
+                            <div class="setting-row">
+                                <span class="setting-label">备份间隔(分钟)</span>
+                                <input type="number" class="setting-input" id="local-backup-interval" min="1" placeholder=">=1">
                             </div>
-</div>
+                        </div>
+                    </div>
 
-
-            <label><input type="checkbox" id="local-backup-md"> 启用本地定时备份(MD)</label>
-                        <div id="local-backup-options-md" style="display: none;">
-                            <div class="indented-section">
-                                <label>
-                                    备份间隔(分钟):
-                                    <input type="number" style="height: auto;width: 50px;" id="local-backup-interval-md" min="1" placeholder=">=1">
-                                </label>
+                    <div class="setting-row" style="margin-top: 4px;">
+                        <span class="setting-label">MD 格式备份</span>
+                        <div class="toggle-wrap">
+                            <input type="checkbox" id="local-backup-md">
+                            <label class="toggle-track" for="local-backup-md"></label>
+                        </div>
+                    </div>
+                    <div id="local-backup-options-md" style="display: none;">
+                        <div class="indented-section">
+                            <div class="setting-row">
+                                <span class="setting-label">备份间隔(分钟)</span>
+                                <input type="number" class="setting-input" id="local-backup-interval-md" min="1" placeholder=">=1">
                             </div>
-</div>
-
-
-            <label><input type="checkbox" id="new-tab-export"> 启用新标签页导出(快捷键 Ctrl + . 打开新标签页)</label>
-            <label><input type="checkbox" id="gist-sync"> 启用Gist上传下载(手动上传快捷键 Ctrl + .  手动下载快捷键 Ctrl + Shift + . )</label>
-            <div id="gist-options" style="display: none;">
-                <div class="indented-section">
-                    在<a href="https://gist.github.com/">这里</a>创建一个Secret Gist，在<a href="https://github.com/settings/tokens/new">这里</a>创建一个令牌(只用给Gist权限)
-                    <label>
-                        Gist_地址:
-                        <input type="text" style="height: auto;width: 290px;"" id="gist-url" placeholder="https://api.github.com/gists/xxxxxxxxxx">
-                    </label>
-                    <label>
-                        Gist_Token:
-                        <input type="text" style="height: auto;width: 280px;" id="gist-token" placeholder="ghp_xxxxxxxxxx">
-                    </label>
-    
-                
-                
-                <label><input type="checkbox" id="auto-upload"> 启用自动Gist上传(在新设备使用时请先启用Gist上传下载并按下 Ctrl + Shift + . 手动下载Gist内容，避免覆盖线上内容)</label>
-                <div class="indented-section">
-                    <div id="gist-options2" style="display: none;">
-                        <label>
-                            自动上传间隔(分钟):
-                            <input type="number" style="height: auto;width: 50px;" id="upload-interval" min="600" placeholder=">=5">
-                        </label>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Gist 同步 -->
+                <div class="settings-section">
+                    <div class="settings-section-title">☁️ Gist 云同步</div>
+                    <div class="setting-row">
+                        <span class="setting-label">启用 Gist 上传下载<br><span class="settings-hint">手动上传 Ctrl + . | 手动下载 Ctrl + Shift + .</span></span>
+                        <div class="toggle-wrap">
+                            <input type="checkbox" id="gist-sync">
+                            <label class="toggle-track" for="gist-sync"></label>
+                        </div>
+                    </div>
+                    <div id="gist-options" style="display: none;">
+                        <div class="indented-section">
+                            <div class="settings-hint">
+                                在 <a href="https://gist.github.com/" target="_blank">Gist</a> 创建一个 Secret Gist，在
+                                <a href="https://github.com/settings/tokens/new" target="_blank">这里</a> 创建令牌（仅 Gist 权限）
+                            </div>
+                            <div class="setting-row" style="margin-top: 6px;">
+                                <span class="setting-label">Gist 地址</span>
+                                <input type="text" class="setting-input-text" id="gist-url" placeholder="https://api.github.com/gists/xxxxxxxxxx">
+                            </div>
+                            <div class="setting-row">
+                                <span class="setting-label">Gist Token</span>
+                                <input type="text" class="setting-input-text" id="gist-token" placeholder="ghp_xxxxxxxxxx">
+                            </div>
+                            <div class="setting-row" style="margin-top: 4px;">
+                                <span class="setting-label">自动上传</span>
+                                <div class="toggle-wrap">
+                                    <input type="checkbox" id="auto-upload">
+                                    <label class="toggle-track" for="auto-upload"></label>
+                                </div>
+                            </div>
+                            <div id="gist-options2" style="display: none;">
+                                <div class="setting-row">
+                                    <span class="setting-label">自动上传间隔(分钟)</span>
+                                    <input type="number" class="setting-input" id="upload-interval" min="5" placeholder=">=5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 本地文件存储 -->
+                <div id="file-storage-section" style="display: none;">
+                    <div class="settings-section-title">📁 本地文件存储</div>
+                    <div id="file-status" style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">未连接</div>
+                    <div id="file-hint" style="font-size: 12px; color: var(--danger); display: none;"></div>
+                    <button id="pick-folder-btn">选择文件夹</button>
+                    <button id="disconnect-folder-btn" style="display: none;">断开连接</button>
+                </div>
             </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" id="helpBtn">ℹ️ 帮助</button>
+                <button class="btn-secondary" id="exitconfig2">取消</button>
+                <button class="btn-primary" id="save-config">💾 保存并退出</button>
             </div>
-    
-    
-            
-            <!-- Conditional options for gist sync -->
-    
-    
-            <!-- Save and exit button -->
-    <div class="modal-buttons-container">
-        <button id="helpBtn">ℹ️帮助</button>
-        <button id="save-config">💾保存并退出</button>
-        <button id="exitconfig">退出</button>
-    </div>
         </div>
     
     <!-- 日期导航部分 -->
     <div class="date-nav">
-        <div id="yearDisplay" class="year-line"></div> <!-- 显示年份的第一行 -->
+        <div id="yearDisplay" class="year-line" title="转到今天" style="cursor: pointer;">🧭2026</div> <!-- 显示年份的第一行 -->
         
         <div class="date-line">
-            <span class="arrow" id="prevDay">&lt;</span>
-            <div class="days" id="daysContainer">
-                <!-- 日期将会动态生成 -->
-            </div>
-            <span class="arrow" id="nextDay">&gt;</span>
+            <span class="arrow" id="prevDay">◀</span>
+            <div class="days" id="daysContainer"><div class="day" data-date="2026-05-25">周一<br>5-25</div><div class="day" data-date="2026-05-26">周二<br>5-26</div><div class="day" data-date="2026-05-27">周三<br>5-27</div><div class="day today active" data-date="2026-05-28">周四<br>5-28<span class="badge">2</span></div><div class="day" data-date="2026-05-29">周五<br>5-29<span class="badge">1</span></div><div class="day" data-date="2026-05-30">周六<br>5-30</div><div class="day" data-date="2026-05-31">周日<br>5-31<span class="badge">10</span></div></div>
+            <span class="arrow" id="nextDay">▶</span>
         </div>
     </div>
 
     <!-- 待办列表部分 -->
-    <div class="todo-container" id="todoContainer">
-        <!-- 待办事项将会在这里生成 -->
-    </div>
+    <div class="todo-container" id="todoContainer"><div class="todo-item" draggable="true"><input type="checkbox" class="todo-checkbox"><input type="text" class="todo-text" disabled=""><div class="todo-buttons"><button>编辑</button><button class="delete-confirm">删除</button></div></div><div class="todo-item" draggable="true"><input type="checkbox" class="todo-checkbox"><input type="text" class="todo-text" disabled=""><div class="todo-buttons"><button>编辑</button><button class="delete-confirm">删除</button></div></div><div class="todo-item" draggable="true"><input type="checkbox" class="todo-checkbox"><input type="text" class="todo-text completed" disabled=""><div class="todo-buttons"><button>编辑</button><button class="delete-confirm">删除</button></div></div><div class="todo-item" draggable="true"><input type="checkbox" class="todo-checkbox"><input type="text" class="todo-text completed" disabled=""><div class="todo-buttons"><button>编辑</button><button class="delete-confirm">删除</button></div></div><div class="todo-item" draggable="true"><input type="checkbox" class="todo-checkbox"><input type="text" class="todo-text completed" disabled=""><div class="todo-buttons"><button>编辑</button><button class="delete-confirm">删除</button></div></div></div>
     <!-- 日历视图部分 -->
     <div id="calendarView" style="display: none;">
         <div class="calendar-nav">
-            <span class="arrow" id="prevMonth">&lt;</span>
+            <span class="arrow" id="prevMonth">◀</span>
             <span id="viewLabel">周视图</span>
-            <span class="arrow" id="nextMonth">&gt;</span>
+            <span class="arrow" id="nextMonth">▶</span>
         </div>
         <div class="calendar-header">
             <span>周一</span>
@@ -482,14 +1025,16 @@
             <!-- 日历天数将会动态生成 -->
         </div>
     </div>
-    <button id="chooseDateBtn" style="display: none;">选择日期</button>
+    <button id="chooseDateBtn" style="display: none;">调整日期</button>
     <input type="date" id="datePicker" style="display: none;">
-    <button id="addTodo" title="新增任务">➕</button>
-<div style="display: flex; gap: 10px;">
-    <button id="calendarViewBtn">📅日历视图</button>
-    <button id="settingsBtn" title="设置">⚙️</button>
+    <button id="addTodo">➕ 新增任务</button>
+<div class="bottom-actions">
+    <button id="calendarViewBtn">📅 日历视图</button>
+    <button id="settingsBtn">⚙️ 设置</button>
+    <button id="helpBtn2">ℹ️ 帮助</button>
+    <button id="expBtn">⏬ 导出</button>
 </div>
-    <div id="upload-status" class="status"></div>
+    <div id="upload-status" class="status">14:16:01 ℹ️未启用自动上传Gist、下载MD/JSON，请定期手动备份(按 Ctrl + Shift + ? 配置备份方式)</div>
 
 
 
@@ -514,6 +1059,11 @@
             const datePicker = document.getElementById('datePicker');
             let editingTodoId = null; // 用于保存当前正在编辑的待办项的ID
         
+            // 禁止键盘输入日期，只能点击弹出日历控件选择
+            datePicker.addEventListener('keydown', (e) => {
+                e.preventDefault();
+            });
+        
             // 日期选择按钮事件，点击后弹出日期选择器
             chooseDateBtn.addEventListener('click', () => {
                 if (editingTodoId !== null) {
@@ -529,14 +1079,26 @@
                 }
             });
         
-                // 监听用户选择日期的事件
+                // 用户选择日期后弹出确认对话框
             datePicker.addEventListener('change', (event) => {
                 const selectedDate = event.target.value;
         
-                if (selectedDate && editingTodoId !== null) {
-        updateTodoDate(editingTodoId, selectedDate);
+                if (!selectedDate) {
+        // 清除日期操作，忽略并恢复原值
+        datePicker.value = currentSelectedDate;
+        return;
                 }
-                datePicker.style.display = 'none';
+        
+                if (editingTodoId !== null) {
+        const ok = confirm(`确认将任务调整到 ${selectedDate} ？`);
+        if (ok) {
+            updateTodoDate(editingTodoId, selectedDate);
+            datePicker.style.display = 'none';
+        } else {
+            // 取消：恢复原日期，保持选择器可见
+            datePicker.value = currentSelectedDate;
+        }
+                }
             });
         
         
@@ -544,11 +1106,62 @@
                 const daysContainer = document.getElementById("daysContainer");
         
                 let todosByDate = {};
+
+// File System Access API - IndexedDB helpers
+const supportsFileSystem = 'showDirectoryPicker' in window;
+const isFileProtocol = location.protocol === 'file:';
+const DB_NAME = 'TodoAppFile';
+const DB_VERSION = 1;
+const STORE_NAME = 'handles';
+function openFileDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+    };
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+async function saveDirHandle(handle) {
+  const db = await openFileDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put(handle, 'dirHandle');
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e.target.error);
+  });
+}
+async function getDirHandle() {
+  const db = await openFileDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).get('dirHandle');
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = (e) => reject(e.target.error);
+  });
+}
+async function removeDirHandle() {
+  const db = await openFileDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).delete('dirHandle');
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e.target.error);
+  });
+}
+function updateFileStatus(msg) {
+  const el = document.getElementById('file-status');
+  if (el) el.textContent = msg;
+}
+
                 const todoContainer = document.getElementById('todoContainer');
                 const addTodoBtn = document.getElementById('addTodo');
                 let currentSelectedDate = formatDate(currentDate); // 初始日期
         
                 let draggedTodo = null; // 存储被拖动的待办信息
+                let fileStorageConnected = false;
         
                 function loadTodos() {
         const storedData = localStorage.getItem('todosByDate');
@@ -579,11 +1192,10 @@
             // 只有在有有效 todos 的情况下才保存到 localStorage
             if (hasValidTodos) {
                 localStorage.setItem('todosByDate', JSON.stringify(todosToSave));
-        
+                syncTodosToFile(todosToSave);
             } else {
                 // 如果没有有效的 todos，则清空 localStorage
                 localStorage.removeItem('todosByDate');
-        
             }
         }
         
@@ -722,13 +1334,13 @@
             todoElement.classList.add('editing');
                         todoElement.setAttribute('draggable', false);
         
-            // 创建选择日期按钮
+            // 创建调整日期按钮
             const chooseDateBtn = document.createElement('button');
-            chooseDateBtn.textContent = '选择日期';
+            chooseDateBtn.textContent = '调整日期';
         // 新增日期选择器容器
                 const datePickerContainer = document.createElement('div');
                 datePickerContainer.className = 'date-picker-container';
-            // 选择日期按钮的点击事件
+            // 调整日期按钮的点击事件
             chooseDateBtn.addEventListener('click', () => {
                 // 显示日期选择器并设置默认值为当前待办事项的日期
                 datePicker.value = currentSelectedDate; // 使用当前选定的日期
@@ -799,7 +1411,7 @@
            const buttons = document.querySelectorAll('button');
             // 遍历所有按钮，查找文本为“确定”的按钮
             buttons.forEach(button => {
-                if (button.textContent.trim() === '选择日期') {
+                if (button.textContent.trim() === '调整日期') {
         button.style.display = 'none'; 
                 }
             });  
@@ -825,10 +1437,8 @@
         todoContainer.appendChild(todoElement);
                 }
         
-                function handleDragStart(todo) {
-            const currentDateElement = document.querySelector('.calendar-day.active'); // 获取当前选中日期的元素
-            const currentDate = currentDateElement ? currentDateElement.getAttribute('data-date') : currentSelectedDate; // 获取当前选中日期
-            draggedTodo = { ...todo, sourceDate: currentDate }; // 将当前日期设置为源日期
+                function handleDragStart(todo, sourceDate) {
+            draggedTodo = { ...todo, sourceDate: sourceDate || currentSelectedDate };
                 }
         
               function handleDrop(event, targetDate) {
@@ -877,7 +1487,7 @@
         const buttons = document.querySelectorAll('button');
             // 遍历所有按钮，查找文本为“确定”的按钮
             buttons.forEach(button => {
-                if (button.textContent.trim() === '选择日期') {
+                if (button.textContent.trim() === '调整日期') {
         button.style.display = 'none'; 
                 }
             });  
@@ -910,10 +1520,11 @@
                 return todo;
             }).filter(todo => todo !== null); // 过滤掉空文本的待办
             renderTodoList();
-        chooseDateBtn.style.display = 'none'; // 隐藏 "选择日期" 按钮
+        chooseDateBtn.style.display = 'none'; // 隐藏 "调整日期" 按钮
+                datePicker.style.display = 'none';
                 editingTodoId = null; // 清空编辑中的ID
                 }
-        
+
                 function editTodoText(id) {
             todosByDate[currentSelectedDate] = todosByDate[currentSelectedDate].map(todo => {
                 if (todo.id === id) {
@@ -923,7 +1534,7 @@
                 return todo;
             });
         
-            chooseDateBtn.style.display = 'none'; // 显示 "选择日期" 按钮
+            chooseDateBtn.style.display = 'none'; // 显示 "调整日期" 按钮
             renderTodoList();
                 }
          function updateTodoDate(id, newDate) {
@@ -974,7 +1585,8 @@ const selectedDateObj = new Date(newDate);
             });  
         
                 }
-                chooseDateBtn.style.display = 'none'; // 隐藏 "选择日期" 按钮
+                chooseDateBtn.style.display = 'none'; // 隐藏 "调整日期" 按钮
+                datePicker.style.display = 'none';
                 editingTodoId = null; // 清空编辑中的ID
             }
                 function confirmDelete(id) {
@@ -1026,10 +1638,24 @@ const selectedDateObj = new Date(newDate);
                 moveUncompletedTodosToToday();
                 updateDays();
                 renderTodoList();
-        
-        
-        
-        
+                loadFromFileIfAvailable();
+                document.addEventListener('pointerdown', async function onFirstTap() {
+                  document.removeEventListener('pointerdown', onFirstTap);
+                  const dirHandle = await getDirHandle();
+                  if (!dirHandle) return;
+                  const permission = await dirHandle.queryPermission({ mode: 'read' });
+                  if (permission === 'granted') return;
+                  const granted = await dirHandle.requestPermission({ mode: 'read' });
+                  if (granted === 'granted') {
+                    loadFromFileIfAvailable();
+                    if (document.getElementById('config-modal').classList.contains('show')) {
+                      updateFileStatusAfterLoad();
+                    }
+                  }
+                }, { once: true });
+
+
+
         let isCalendarView = false; // 跟踪是否在日历视图中
         const calendarViewBtn = document.getElementById("calendarViewBtn");
         const calendarBody = document.getElementById("calendarBody");
@@ -1039,45 +1665,101 @@ const selectedDateObj = new Date(newDate);
 
 
         // 设置按钮
-document.getElementById("settingsBtn").addEventListener("click", () => {
-    document.getElementById("config-modal").style.display = "block";
+async function updateFileStatusAfterLoad() {
+  const dirHandle = await getDirHandle();
+  const disconnectBtn = document.getElementById('disconnect-folder-btn');
+  if (!dirHandle) {
+    updateFileStatus('未连接');
+    if (disconnectBtn) disconnectBtn.style.display = 'none';
+    return;
+  }
+  let permission = await dirHandle.queryPermission({ mode: 'read' });
+  if (permission !== 'granted') permission = await dirHandle.requestPermission({ mode: 'read' });
+  if (permission !== 'granted') {
+    updateFileStatus('权限不足');
+    if (disconnectBtn) disconnectBtn.style.display = 'inline-block';
+    return;
+  }
+  updateFileStatus(`已连接到: ${dirHandle.name}`);
+  if (disconnectBtn) disconnectBtn.style.display = 'inline-block';
+}
+
+function openModal() {
+    document.getElementById('modal-overlay').classList.add('show');
+    document.getElementById('config-modal').classList.add('show');
     document.getElementById("gist-options").style.display = globalConfig.backupgist ? "block" : "none";
     document.getElementById("gist-options2").style.display = globalConfig.autoUpload ? "block" : "none";
     document.getElementById("local-backup-options").style.display = globalConfig.localBackup? "block" : "none";
     document.getElementById("local-backup-options-md").style.display = globalConfig.localBackupmd? "block" : "none";
-    
+    const fsSection = document.getElementById('file-storage-section');
+    const fileHint = document.getElementById('file-hint');
+    const pickBtn = document.getElementById('pick-folder-btn');
+    const disconnectBtn = document.getElementById('disconnect-folder-btn');
+    if (fsSection) {
+      if (supportsFileSystem) {
+        fsSection.style.display = 'block';
+        if (fileHint) fileHint.style.display = 'none';
+        if (pickBtn) pickBtn.style.display = 'inline-block';
+      } else {
+        fsSection.style.display = 'block';
+        if (fileHint) { fileHint.style.display = 'block'; fileHint.textContent = '⚠️ 当前浏览器不支持该功能'; }
+        if (pickBtn) pickBtn.style.display = 'none';
+        if (disconnectBtn) disconnectBtn.style.display = 'none';
+      }
+    }
+    updateFileStatusAfterLoad();
+}
+
+function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('show');
+    document.getElementById('config-modal').classList.remove('show');
+}
+
+document.getElementById("settingsBtn").addEventListener("click", openModal);
+
+document.getElementById('pick-folder-btn')?.addEventListener('click', async () => {
+  try {
+    const dirHandle = await window.showDirectoryPicker();
+    await saveDirHandle(dirHandle);
+    updateFileStatus(`已连接到: ${dirHandle.name}`);
+    document.getElementById('disconnect-folder-btn').style.display = 'inline-block';
+    loadFromFileIfAvailable();
+  } catch (e) {
+    if (e.name !== 'AbortError') console.error('选择文件夹失败:', e);
+  }
+});
+
+document.getElementById('disconnect-folder-btn')?.addEventListener('click', async () => {
+  await removeDirHandle();
+  updateFileStatus('未连接');
+  document.getElementById('disconnect-folder-btn').style.display = 'none';
 });
 
 
 
 // 帮助功能
-document.getElementById("helpBtn").addEventListener("click", function() {
-    const helpTab = window.open();
-    helpTab.document.write(`
-        <html>
-            <head>
-                <title>使用说明</title>
-            </head>
-            <body>
-                <h1>使用说明</h1>
-                <p>1. 点击日期可以切换日期，点击<>可以切换上一周、下一周</p>
-                <p>2. 点击+新增待办</p>
-                <p>3. 点击编辑按钮修改待办内容</p>
-                <p>4. 点击选择日期，可以将任务移动到其他日期</p>
-                <p>5. 可以拖动任务到其他日期</p>
-                <p>6. 前期未完成的任务会自动转移到今天，已完成的不会转移</p>
-                <p>7. 点击日历视图可以看整个月已完成、未完成的任务</p>
-                <p>8. 日历视图下，可以拖动改变任务日期</p>
-                <p>9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务</p>
-                <p>10. ctrl+/ 可以显示说明 </p>
-                <p>11. ctrl+, 可以导入任务(格式必须同9导出的)；备份的JSON可以直接粘贴进localstorage </p>
-            </body>
-        </html>
-    `);
-    helpTab.document.close();
-});
+function openHelp() {
+    document.getElementById('help-modal-overlay').classList.add('show');
+    document.getElementById('help-modal').classList.add('show');
+}
 
-        
+function closeHelp() {
+    document.getElementById('help-modal-overlay').classList.remove('show');
+    document.getElementById('help-modal').classList.remove('show');
+}
+
+document.getElementById("helpBtn").addEventListener("click", openHelp);
+document.getElementById("helpBtn2").addEventListener("click", openHelp);
+document.getElementById('help-close').addEventListener('click', closeHelp);
+document.getElementById('help-close-btn').addEventListener('click', closeHelp);
+document.getElementById('help-modal-overlay').addEventListener('click', closeHelp);   
+
+
+// 导出按钮
+document.getElementById("expBtn").addEventListener("click", function() {
+    if (globalConfig.backupmd) backupmdornewtab2();
+    if (globalConfig.backupjson) backupjsonornewtab();
+});          
         calendarViewBtn.addEventListener('click', toggleCalendarView);
         document.getElementById("prevMonth").addEventListener('click', () => changeMonth(-1));
         document.getElementById("nextMonth").addEventListener('click', () => changeMonth(1));
@@ -1089,6 +1771,7 @@ document.getElementById("helpBtn").addEventListener("click", function() {
         // 控制日期导航的显示与隐藏
             document.querySelector('.date-nav').style.display = isCalendarView ? 'none' : 'flex';
                 calendarViewBtn.textContent = isCalendarView ? '🕔️周视图' : '📅日历视图';
+                document.body.classList.toggle('calendar-mode', isCalendarView);
         const addTodoButton = document.getElementById("addTodo");
             addTodoButton.style.display = isCalendarView ? 'none' : 'block';
             // 控制设置按钮的显示/隐藏
@@ -1177,8 +1860,8 @@ document.getElementById("helpBtn").addEventListener("click", function() {
         
         todoText.addEventListener('dragstart', (e) => {
             isDragging = true; // 设置拖动标志
-        
-            handleDragStart(todo); // 拖动开始
+
+            handleDragStart(todo, formattedDate); // 拖动开始
         });
         
         dayDiv.addEventListener('mousedown', () => {
@@ -1188,11 +1871,12 @@ document.getElementById("helpBtn").addEventListener("click", function() {
             renderCalendar(); // 重新渲染日历以高亮显示选中日期
         });
         
-        todoText.addEventListener('mousedown', () => {
+        todoText.addEventListener('mousedown', (e) => {
+            e.stopPropagation(); // 阻止冒泡到 dayDiv，避免触发 renderCalendar 销毁元素
             clickCount++; // 增加点击次数
-        
+
             if (clickCount === 2) { // 检测双击
-        
+
                 if (!isDragging) { // 如果没有拖动，执行双击事件
         toggleComplete(todo.id); // 切换任务状态
         renderCalendar(); // 更新日历视图
@@ -1252,12 +1936,6 @@ function backupmdornewtab() {
         }
 
 
-           if (globalConfig.backuptab){
-                const newTab = window.open();
-                newTab.document.write('<pre>' + output.trim() + '</pre>');
-                newTab.document.close(); // 关闭文档流以完成页面加载
-                    }
-
            if (globalConfig.backupmd) {
         const today = new Date().toISOString().split('T')[0]; // 获取今日日期
         const blob = new Blob([output.trim()], { type: 'text/markdown' });
@@ -1273,6 +1951,60 @@ function backupmdornewtab() {
 
 
 }     
+
+
+function backupmdornewtab2() {
+    
+                const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
+                let output = '';
+ // 获取日期并排序
+        const sortedDates = Object.keys(todosByDate).sort((a, b) => new Date(a) - new Date(b));
+        
+ // 遍历排序后的日期
+        for (const date of sortedDates) {
+            output += `## ${date}\n\n`;
+            const todos = todosByDate[date];
+            todos.forEach(todo => {
+                const completedMarker = todo.completed ? '[x]' : '[ ]';
+                output += `- ${completedMarker} ${todo.text}\n`;
+            });
+            output += '\n'; // 添加空行以分隔日期
+        }
+
+
+
+                const newTab = window.open();
+                newTab.document.write('<pre>' + output.trim() + '</pre>');
+                newTab.document.close(); // 关闭文档流以完成页面加载
+                
+
+
+} 
+
+function jsonexport() {
+    if (!globalConfig.backupjson) return;
+    const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
+    const output = JSON.stringify(todosByDate, null, 2);
+    const today = new Date().toISOString().split('T')[0];
+    const blob = new Blob([output], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `备份于${today}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function backupjsonornewtab() {
+    const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
+    const output = JSON.stringify(todosByDate, null, 2);
+    const newTab = window.open();
+    newTab.document.write('<pre>' + output.trim() + '</pre>');
+    newTab.document.close();
+}
+
 function backup2gist() {
     const todosByDate = JSON.parse(localStorage.getItem('todosByDate'));
                 let output = '';
@@ -1309,35 +2041,11 @@ function backup2gist() {
             if (event.ctrlKey && event.key === '.' ) {
 
                 backupmdornewtab();
+                jsonexport();
                 backup2gist();
 
             } else if (event.ctrlKey && event.key === '/') {
-                const helpTab = window.open();
-                helpTab.document.write(`
-        <html>
-            <head>
-                <title>使用说明</title>
-                
-        
-        
-            </head>
-            <body>
-                <h1>使用说明</h1>
-                <p>1. 点击日期可以切换日期，点击<>可以切换上一周、下一周</p>
-                <p>2. 点击+新增待办</p>
-                <p>3. 点击编辑按钮修改待办内容</p>
-                <p>4. 点击选择日期，可以将任务移动到其他日期</p>
-                <p>5. 可以拖动任务到其他日期</p>
-                <p>6. 前期未完成的任务会自动转移到今天，已完成的不会转移</p>
-                <p>7. 点击日历视图可以看整个月已完成、未完成的任务</p>
-                <p>8. 日历视图下，可以拖动改变任务日期</p>
-                <p>9. ctrl+. 可以以markdown格式导出所有任务、上传Gist备份，在新标签页显示所有任务</p>
-                <p>10. ctrl+/ 可以显示说明 </p>
-                <p>11. ctrl+, 可以导入任务(格式必须同9导出的) </p>
-            </body>
-        </html>
-                `);
-                helpTab.document.close(); // 关闭文档流以完成页面加载
+                openHelp();
             }
         });
         
@@ -1396,8 +2104,7 @@ function backup2gist() {
                 }
             });
         
-            // 存储到 localStorage
-            localStorage.setItem('todosByDate', JSON.stringify(todosByDate));
+            saveTodos();
             console.log('待办事项已导入:', todosByDate);
 
             //location.reload();
@@ -1504,8 +2211,9 @@ function loadConfig() {
             // 将配置对象赋值给全局变量
             globalConfig = {
                 backupgist: configObject.gistSync || false,
-                backuptab : configObject.newTabExport || false,
+
                 backupmd: configObject.mdExport || false,
+                backupjson: configObject.jsonExport || false,
                 autoUpload: configObject.autoUpload || false,
                 backupgistcycle: configObject.uploadInterval || '',
                 gistUrl: configObject.gistUrl || '',
@@ -1518,8 +2226,9 @@ function loadConfig() {
 
             console.log('配置加载成功:', globalConfig);
     document.getElementById('gist-sync').checked = globalConfig.backupgist;
-    document.getElementById('new-tab-export').checked = globalConfig.backuptab;
+
     document.getElementById('md-export').checked = globalConfig.backupmd;
+    document.getElementById('json-export').checked = globalConfig.backupjson;
     document.getElementById('auto-upload').checked = globalConfig.autoUpload;
     document.getElementById('upload-interval').value = globalConfig.backupgistcycle;
     document.getElementById('gist-url').value = globalConfig.gistUrl;
@@ -1536,6 +2245,49 @@ function loadConfig() {
     }
 }
 
+
+async function syncTodosToFile(data) {
+  if (!supportsFileSystem) return;
+  const dirHandle = await getDirHandle();
+  if (!dirHandle) return;
+  const permission = await dirHandle.queryPermission({ mode: 'readwrite' });
+  if (permission !== 'granted') return;
+  try {
+    const fileHandle = await dirHandle.getFileHandle('todos.json', { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(data, null, 2));
+    await writable.close();
+    const statusElement = document.getElementById('upload-status');
+    if (statusElement) statusElement.textContent = `${new Date().toLocaleTimeString()} ✅ 本地数据保存成功！`;
+  } catch (e) {
+    console.error('文件写入失败:', e);
+  }
+}
+
+async function loadFromFileIfAvailable() {
+  if (!supportsFileSystem) return;
+  const dirHandle = await getDirHandle();
+  if (!dirHandle) return;
+  fileStorageConnected = true;
+  const permission = await dirHandle.queryPermission({ mode: 'read' });
+  if (permission !== 'granted') return;
+  try {
+    const fileHandle = await dirHandle.getFileHandle('todos.json');
+    const file = await fileHandle.getFile();
+    const content = await file.text();
+    const data = JSON.parse(content);
+    localStorage.setItem('todosByDate', JSON.stringify(data));
+    loadTodos();
+    moveUncompletedTodosToToday();
+    updateDays();
+    renderTodoList();
+    updateFileStatus(`已连接到: ${dirHandle.name}`);
+    const statusElement = document.getElementById('upload-status');
+    if (statusElement) statusElement.textContent = `${new Date().toLocaleTimeString()} ✅ 本地数据读取成功！`;
+  } catch (e) {
+    updateFileStatus(`已选择: ${dirHandle.name}（尚未写入数据）`);
+  }
+}
 
 function backupToLocal() {
     if (!globalConfig.localBackup || !globalConfig.localBackupInterval) return;
@@ -1664,7 +2416,7 @@ window.onload = function() {
     }
     
     // 如果所有备份功能都未启用，则显示提示
-    if (!hasGistBackup && !hasJsonBackup && !hasMdBackup) {
+    if (!hasGistBackup && !hasJsonBackup && !hasMdBackup && !fileStorageConnected) {
         statusElement.textContent = `${currentTime} ℹ️未启用自动上传Gist、下载MD/JSON，请定期手动备份(按 Ctrl + Shift + ? 配置备份方式)`;
     }
 };
@@ -1677,10 +2429,7 @@ window.onload = function() {
 
 document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.shiftKey && e.key === '?') {
-            document.getElementById('config-modal').style.display = 'block';
-            document.getElementById('gist-options').style.display = globalConfig.backupgist ? 'block' : 'none';
-            document.getElementById('gist-options2').style.display = globalConfig.autoUpload ? 'block' : 'none';
-
+            openModal();
         }
     });
 
@@ -1712,8 +2461,9 @@ document.addEventListener('keydown', (e) => {
     document.getElementById('save-config').addEventListener('click', () => {
         const config = {
             gistSync: document.getElementById('gist-sync').checked,
-            newTabExport: document.getElementById('new-tab-export').checked,
+
             mdExport: document.getElementById('md-export').checked,
+            jsonExport: document.getElementById('json-export').checked,
             autoUpload: document.getElementById('auto-upload').checked,
             uploadInterval: parseInt(document.getElementById('upload-interval').value, 10) || null,
             gistUrl: document.getElementById('gist-url').value || '',
@@ -1731,12 +2481,12 @@ document.addEventListener('keydown', (e) => {
         window.location.reload();
     });
 
-    document.getElementById('exitconfig').addEventListener('click', () => {
-        document.getElementById('config-modal').style.display = 'none';
-    });
+    document.getElementById('exitconfig').addEventListener('click', closeModal);
+    document.getElementById('exitconfig2').addEventListener('click', closeModal);
+    document.getElementById('modal-overlay').addEventListener('click', closeModal);
 
 
         
     </script>
-</body>
-</html>
+
+</body></html>
